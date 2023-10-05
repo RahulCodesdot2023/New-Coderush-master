@@ -1,0 +1,72 @@
+﻿@model CodesDotHRMS.Models.Thoughts
+
+
+@using Microsoft.AspNetCore.Identity
+@using System.Globalization
+@inject UserManager<ApplicationUser> _userManager
+
+
+
+    @{ ViewData["Title"] = "Home";
+
+    var user = await _userManager.GetUserAsync(User);
+    var roles = await _userManager.GetRolesAsync(user);
+
+    }
+
+
+    <div class="content-wrapper">
+
+        <section class="content-header">
+            <h1>
+                @ViewData["Title"]
+            </h1>
+            <p>
+                @await Html.PartialAsync(PartialView.StatusMessage, TempData[StaticString.StatusMessage])
+            </p>
+        </section>
+
+
+        <hr />
+        <div style="margin:1%">
+
+            <div class="row">
+                <div class="col-md-4">
+                    <form asp-action="Addthoughts">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        @*<div class="form-group">
+                                <label asp-for="ThoughtsID" class="control-label" hidden="hidden"></label>
+                                <input asp-for="ThoughtsID" class="form-control" hidden="hidden" disabled="disabled" />
+
+                            </div>*@
+                        <div class="form-group">
+                            <label for="thoughts" class="control-label">thoughts</label>
+                            <input type="text" class="form-control" />
+
+                        </div>
+                        <div class="form-group">
+                            <label for="Day" class="control-label">Day</label>
+                            <input type="text" class="form-control" />
+
+                        </div>
+                        <div class="form-group">
+                            <label for="birthday">createdate:</label>
+                            <input type="date" id="birthday" name="createdate">
+                        </div>
+                        <div class="form-group">
+                            <label for="birthday">Updatedate:</label>
+                            <input type="date" id="birthday" name="Updatedate">
+                        </div>
+                        <div class="form-group">
+                            <input type="submit" value="Create" class="btn btn-default" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div>
+                <a asp-action="Index">Back to List</a>
+            </div>
+
+        </div>
+    </div>

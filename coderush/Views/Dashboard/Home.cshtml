@@ -1,0 +1,479 @@
+﻿@model List<coderush.Models.ViewModels.ApplicationViewModel>
+@using Microsoft.AspNetCore.Identity
+@using System.Globalization
+@inject UserManager<ApplicationUser> _userManager
+
+
+
+@{ ViewData["Title"] = "Home";
+
+    var user = await _userManager.GetUserAsync(User);
+    var roles = await _userManager.GetRolesAsync(user);
+
+}
+
+<style>
+    .annoset {
+        margin-left: 50px;
+        display: block;
+    }
+</style>
+<div class="content-wrapper">
+
+    <section class="content-header">
+        <h1>
+            @ViewData["Title"]
+        </h1>
+        <p>
+            @await Html.PartialAsync(PartialView.StatusMessage, TempData[StaticString.StatusMessage])
+        </p>
+    </section>
+
+
+    <div class="row">
+        <div class="col-md-4">
+            <section class="content">
+                <!-- Default box -->
+                <div class="box">
+                    <div class="box-header with-border">
+                        <h2 class="box-title">Birthday List</h2>
+                        <div class="box-tools pull-right">
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped grid" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th width="50%" colspan="2">Name</th>
+                                        <th width="50%" colspan="2">Date of Birth</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbl_bday">
+                                    @*@foreach (var item in Model)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    @item.UserName
+                                                </td>
+                                                <td>
+                                                    @item.DOB.Value.ToString("dd MMMM yyyy")
+                                                </td>
+
+                                            </tr>
+                                        }*@
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+                <!-- /.box -->
+            </section>
+        </div>
+        <!-- Main content -->
+
+
+        <div class="col-md-4">
+            <section class="content">
+                <!-- Default box -->
+                <div class="box">
+                    <div class="box-header with-border">
+                        <div class="col-md-4">
+                            <h2 class="box-title">Thoughts</h2>
+                            <a href="/Dashboard/Managethoughts" class="" style="position: absolute; right: -334px; top: -5px; "> Manage Thoughts </a>
+                            @*<button type="button" class="btn btn-primary" style="position: absolute; right: -334px; top: -5px; " onclick="btnManagethoughts();">Manage Thoughts</button>*@
+
+                            <div class="box-tools pull-right">
+                            </div>
+                        </div>
+
+                        <div class="box-tools pull-right">
+                            @*<a href="/DashboardController/CreateThoughts" class="btn btn-primary"><i class="fa fa-plus "></i></a>*@
+                            @*<button class="btn btn-primary fa fa-plus " id="BtnAddEmployee"></button>*@
+                            @*<a href="/Dashboard/Form" class="btn btn-primary"><i class="fa fa-plus "></i></a>*@
+
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th width="50%" colspan="2">Thoughts</th>
+                                        <th width="50%" colspan="2">Day</th>
+                                        @*<th width="15%">Date</th>*@
+                                        @*<th width="15%">Day</th>*@
+                                    </tr>
+                                </thead>
+                                <tbody id="tbl_thought"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+                <!-- /.box -->
+            </section>
+        </div>
+
+        <div class="col-md-4">
+            <section class="content">
+                <!-- Default box -->
+                <div class="box">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">List of Leave item</h3>
+                    </div>
+                    <div><input type="hidden" id=""></div>
+                    <div class="box-body">
+                        @*@if (roles.Contains("SuperAdmin") || roles.Contains("HR"))
+                            {
+                                <div class="form-group">
+                                    <select name="Userid" id="leavedrpdwn" class="form-control" asp-items="@ViewBag.UserList"></select>
+                                </div>
+                            }*@
+                        <div class="table-responsive">
+                            <table id="Leavegrid" class="table table-striped" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>UserName</th>
+                                        <th>From Date</th>
+                                        <th>To Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbl_leave">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+                <!-- /.box -->
+            </section>
+        </div>
+
+
+
+
+
+        <div class="col-md-4">
+            <section class="content">
+                <!-- Default box -->
+                <div class="box">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Holiday</h3>
+                    </div>
+                    <div><input type="hidden" id=""></div>
+                    <div class="box-body">
+                        @*@if (roles.Contains("SuperAdmin") || roles.Contains("HR"))
+                            {
+                                <div class="form-group">
+                                    <select name="Userid" id="leavedrpdwn" class="form-control" asp-items="@ViewBag.UserList"></select>
+                                </div>
+                            }*@
+
+                        <div class="table-responsive">
+                            <table id="Holidaygrid" class="table table-striped" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th width="6%" colspan="1">Name</th>
+                                        <th width="5%" colspan="1">Day</th>
+                                        <th width="12%" colspan="1">Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbl_Holiday">
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+                <!-- /.box -->
+            </section>
+        </div>
+
+        <div class="col-md-4">
+            <section class="content">
+                <!-- Default box -->
+                <div class="box">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Hr Announcement List</h3>
+                    </div>
+                    <div><input type="hidden" id=""></div>
+                    <div class="box-body">
+                        @*@if (roles.Contains("SuperAdmin") || roles.Contains("HR"))
+                            {
+                                <div class="form-group">
+                                    <select name="Userid" id="leavedrpdwn" class="form-control" asp-items="@ViewBag.UserList"></select>
+                                </div>
+                            }*@
+                        <div class="table-responsive">
+                            <table id="HRAgrid" class="table table-striped" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th width="20%" colspan="2">Title</th>
+                                        <th width="80%" colspan="4" class="annoset">Announcement</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbl_Announcement">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+                <!-- /.box -->
+            </section>
+        </div>
+
+
+
+    </div>
+    <!-- /.content -->
+    <!-- /.content -->
+    <!-- /.content -->
+    <!-- /.content-wrapper -->
+</div>
+
+
+
+
+
+@section Styles{
+    <!-- DataTables -->
+    @*<link rel="stylesheet" href="~/adminlte/components/datatables.net-bs/css/dataTables.bootstrap.min.css">*@
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css">
+}
+
+
+@section Scripts{
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+    <!-- DataTables -->
+    @*<script src="~/adminlte/components/datatables.net/js/jquery.dataTables.min.js"></script>
+        <script src="~/adminlte/components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>*@
+    <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+
+
+    <!-- page script -->
+    <script type="text/javascript">
+        $(document).ready(function () {
+            Thoughts();
+            Birthdays();
+            //leave();
+            //Holiday();
+            HRAnnouncement();
+
+            $('#Leavegrid').dataTable({
+                "autoWidth": false,
+                "searching": false,
+                "paging": true,
+                "info": false,
+                "lengthMenu": [5, 10, 20],
+                "lengthChange": false,
+                "filter": false, // this is for disable filter (search box)
+                "orderMulti": false, // for disable multiple column at once
+                "pageLength": 5,
+                "ordering": false,
+                "aaSorting": [],
+                "scrollX": true,
+
+                "ajax": {
+                    "url": "/Dashboard/leave",
+                    "type": "Get",
+                    "datatype": "json",
+                    "beforeSend": function () {
+
+                    },
+                    "complete": function () {
+
+                    }
+                },
+                "columns": [
+                    {
+                        "data": "userName",
+                        "name": 0,
+                        "autoWidth": true,
+                    },
+                    {
+                        "data": "fromdate",
+                        "name": 1,
+                        "autoWidth": true,
+                        "render": function (data, type, row) {
+                            if (data != null && data != "") {
+                                return moment(data).format("DD/MM/YYYY");
+                            }
+                        }
+                    },
+                    {
+                        "data": "todate",
+                        "name": 2,
+                        "autoWidth": true,
+                        "render": function (data, type, row) {
+                            if (data != null && data != "") {
+                                return moment(data).format("DD/MM/YYYY");
+                            }
+                        }
+                    },
+                ],
+                "order": [[1, "desc"]],
+                "select": 'single'
+            });
+
+            $('#Holidaygrid').dataTable({
+                "autoWidth": false,
+                "searching": false,
+                "paging": true,
+                "info": false,
+                "lengthMenu": [5, 10, 20],
+                "lengthChange": false,
+                "filter": false, // this is for disable filter (search box)
+                "orderMulti": false, // for disable multiple column at once
+                "pageLength": 5,
+                "ordering": false,
+                "aaSorting": [],
+                "scrollX": true,
+
+                "ajax": {
+                    url: "/Dashboard/HolidayList",
+                    type: "Get",
+                    dataType: "json",
+                    "beforeSend": function () {
+
+                    },
+                    "complete": function () {
+
+                    }
+                },
+                "columns": [
+                    {
+                        "data": "name", "name": 0, "autoWidth": true,
+                    },
+                    {
+                        "data": "day",
+                        "name": 1,
+                        "autoWidth": true,
+
+                    },
+                    {
+                        "data": "date",
+                        "name": 2,
+                        "autoWidth": true,
+                        "render": function (data, type, row) {
+                            if (data != null && data != "") {
+                                return moment(data).format("DD/MM/YYYY");
+                            }
+                        }
+                    },
+                ],
+                "order": [[1, "desc"]],
+                "select": 'single'
+            });
+
+        });
+
+        function Thoughts() {
+            $.ajax({
+                url: "/Dashboard/GetthougthByday",
+                type: "Get",
+                dataType: "json",
+                contentType: "application/json;charset=utf-8;",
+                success: function (result, status, xhr) {
+                    var res = '';
+                    if (result.data != null && result.data.thoughts != null && result.data.dayvalue != null) {
+                        res += '<tr>';
+                        res += '<td>' + result.data.thoughts + '<td>';
+                        res += '<td>' + result.data.dayvalue + '<td>';
+                        res += '</tr>';
+
+                        $("#tbl_thought").html(res);
+
+                    } else {
+                        res += '<tr>';
+                        res += '<td colspan="4" style="text-align: center;">No record found<td>';
+                        res += '</tr>';
+
+                        $("#tbl_thought").html(res);
+                    }
+                },
+
+                error: function () {
+                    toastr.error('data not get');
+                }
+            });
+        };
+
+        function Birthdays() {
+            debugger;
+            $.ajax({
+                url: "/Dashboard/GetBirthdayListByMonth",
+                type: "GET",
+                dataType: "json",
+                contentType: "application/json;charset=utf-8;",
+                success: function (result, status, xhr) {
+                    debugger;
+                    var res = '';
+
+                    if (result.data != null && result.data.length > 0) {
+                        result.data.forEach(function (item) {
+                            res += '<tr>';
+                            res += '<td colspan="2">' + item.name + '</td>';
+                            res += '<td colspan="2">' + moment(item.dob).format("DD/MM/YYYY") + '</td>';
+                            res += '</tr>';
+                        });
+
+                        $("#tbl_bday").html(res);
+                    } else {
+                        res += '<tr>';
+                        res += '<td colspan="2" style="text-align: center;">No records found</td>';
+                        res += '</tr>';
+                        $("#tbl_bday").html(res);
+                    }
+                },
+                error: function () {
+                    toastr.error('Data not retrieved');
+                }
+            });
+        };
+
+        function HRAnnouncement() {
+            $.ajax({
+                url: "/Dashboard/Hrannocuncement",
+                type: "Get",
+                dataType: "json",
+                contentType: "application/json;charset=utf-8;",
+                success: function (result, status, xhr) {
+                    var res = '';
+                    $.each(result.data, function (index, item) {
+                        var currentdate = new Date();
+                        var day = getdatediff(currentdate, item.createdDate);
+                        if (day < 15) {
+                            res += '<tr style="background-color:#fb060630;">';
+                        } else {
+                            res += '<tr>';
+                        }
+                        res += '<td>' + item.text + '<td>';
+                        res += '<td class="annoset">' + item.description + '<td>';
+                        res += '</tr>';
+                    });
+                    $("#tbl_Announcement").html(res);
+                },
+
+                error: function () {
+                    toastr.error('data not get');
+                }
+            });
+        };
+
+        function getdatediff(date1, date2) {
+            date1 = new Date(date1);
+            date2 = new Date(date2);
+            var milli_secs = date1.getTime() - date2.getTime();
+
+            // Convert the milli seconds to Days
+            var days = milli_secs / (1000 * 3600 * 24);
+            return parseInt(days);
+        };
+    </script>
+
+}

@@ -1,0 +1,272 @@
+﻿@model CodesDotHRMS.Models.LeaveManagement
+
+@{
+    ViewData["Title"] = "Leave";
+}
+<style>
+    .btnmargen {
+        margin-left: 20px;
+    }
+
+    .row .col-lg-12 {
+        margin-bottom: 10px;
+    }
+</style>
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h1>
+            @ViewData["Title"]
+        </h1>
+        <p>
+            @await Html.PartialAsync(PartialView.StatusMessage, TempData[StaticString.StatusMessage])
+        </p>
+
+    </section>
+    <!-- Main content -->
+    <input type="hidden" value="@ViewBag.leavetypelist" id="levarbucket" />
+    <input type="hidden" value="0" id="PaidLeaveCount" />
+    <input type="hidden" value="0" id="UnPaidLeaveCount" />
+
+    <form asp-controller="LeaveManagement" asp-action="AddLeaveIndex" method="post">
+        <section class="content">
+            <!-- Default box -->
+            <div class="box">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Add Leave</h3>
+                    <!--<div class="box-tools pull-right">-->
+                    @*<a href="" class="btn btn-primary"><i class="fa fa-plus"></i></a>*@
+                    <!--</div>-->
+                </div>
+                <div class="box-body">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <label>From Date:</label>
+                            <input id="leaveFromdate" asp-for="@ViewData["sdate"]" type="date" name="sdate" class="form-control  datechange" />
+                            <span class="text-danger errfromdate">This field is required</span>
+                        </div>
+                        <div class="col-lg-12">
+                            <label>To Date:</label>
+                            <input id="leaveTOdate" type="date" asp-for="@ViewData["edate"]" name="edate" class="form-control datechange" />
+                            <span class="text-danger errtodate">This field is required</span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-lg-12">
+                            <input type="radio" id="radiohalf" name="leavedaytype" value="1">
+                            <label>Half Day</label><br>
+                            <input type="radio" id="radiofull" checked name="leavedaytype" value="2">
+                            <label>Full Day</label><br>
+                            <span class="text-danger errleavetype">Please select any one.</span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <label>Number of Days</label>
+                            <input id="diffday" type="text" class="form-control" disabled />
+                        </div>
+
+                        <div class="col-lg-12">
+                            <label>Leave Type</label>
+                            <span id="leavecount" asp-for="@ViewBag.leavetypelist" name="leavetypelist" />
+                        </div>
+                    </div>
+                    <br />
+
+                    <div class="row btnmargen">
+                        <button type="button" onclick="Save_data()" class="btn btn-primary">Request</button>
+                        @*<button type="button" onclick="/LeaveManagement/LeaveManagIndex" class="btn btn-primary"> return </button>*@
+                        <a href="/LeaveManagement/LeaveManagIndex" class="btn btn-primary"> Cancel </a>
+                    </div>
+
+                    <br />
+                </div>
+                <!-- /.box-body -->
+            </div>
+            <!-- /.box -->
+        </section>
+    </form>
+</div>
+
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    }
+
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="~/js/LeaveCount.js"></script>
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            $(".text-danger").hide();
+            $("#radiohalf").attr('disabled', true);
+            $("#radiofull").attr('disabled', false);
+            $(".datechange").change(function () {
+                var fromdate = $('#leaveFromdate').val();
+                var todate = $('#leaveTOdate').val();
+                var bucket = $('#levarbucket').val();
+                var NOD = 0;
+
+                if (new Date(fromdate) > new Date(todate)) {
+                    toastr.warning("Please select validate date.")
+                    $('#leaveTOdate').val('');
+                    return false;
+                }
+                if (fromdate == todate) {
+                    $("#radiohalf").prop('checked', 'checked');
+                    $("#radiohalf").attr('disabled', false);
+                    $("#radiofull").attr('disabled', true);
+                }
+                else {
+                    $("#radiofull").prop('checked', 'checked');
+                    $("#radiofull").attr('disabled', false);
+                    $("#radiohalf").attr('disabled', true);
+                }
+
+                $("#diffday").val(0)
+                $("#leavecount").empty();
+
+                if (fromdate != null && todate != null && fromdate != "" && todate != "" && fromdate != undefined && todate != undefined) {
+
+                    NOD = DaysCalculate(fromdate, todate);
+
+                    var paidlive = bucket;
+
+                    if (NOD > 0) {
+                        if (NOD > bucket) {
+                            var UnPaidleavescount = NOD - bucket;
+
+                            $("#leavecount").html("<div> Paid Leave : " + parseInt(bucket) + "</br> UnPaid Leave : " + UnPaidleavescount + " </div>");
+
+                            $("#PaidLeaveCount").val(bucket);
+                            $("#UnPaidLeaveCount").val(UnPaidleavescount);
+
+                        }
+                        else {
+
+                            $("#leavecount").html("<div> Paid Leave : " + parseInt(NOD) + " </div >");
+
+                            $("#PaidLeaveCount").val(NOD);
+                            $("#UnPaidLeaveCount").val(0);
+
+                        }
+
+                        $("#diffday").val(NOD);
+                        $("#radiohalf").attr('disabled', true);
+                    }
+                    else {
+                        var leaveco = (bucket > 0) ? 0.5 : 0;
+                        $("#UnPaidLeaveCount").val(0);
+                        if (leaveco > 0) {
+                            $("#leavecount").html("<div> Paid Leave : " + leaveco + " </div >");
+                            $("#PaidLeaveCount").val(leaveco);
+                        }
+                        else {
+                            $("#leavecount").html("<div> Paid Leave : " + leaveco + "</br> UnPaid Leave : " + 0.5 + " </div>");
+                            $("#UnPaidLeaveCount").val(0.5);
+                        }
+
+                        $("#diffday").val(0.5);
+
+                        $("#radiohalf").attr('disabled', false);
+                    }
+                }
+
+            });
+
+            $('#radiohalf').change(function () {
+                if (this.checked) {
+                    $("#diffday").val(0.5);
+                }
+                $('#radiofull').val(this.checked);
+            });
+
+            $('#radiofull').change(function () {
+                if (this.checked) {
+                    //$("#diffday").val(1);
+                }
+                //$('#radiohalf').val(this.checked);
+            });
+
+        });
+
+
+        function Save_data() {
+            $(".text-danger").hide();
+            var isvalied = true;
+            var fromdate = $('#leaveFromdate').val();
+            var todate = $('#leaveTOdate').val();
+            var leavetype = $('input[name="leavedaytype"]:checked').val();
+
+            if (fromdate == null || fromdate == "" || fromdate == undefined) {
+                $(".errfromdate").show();
+                isvalied = false;
+            }
+            if (todate == null || todate == "" || todate == undefined) {
+                $(".errtodate").show();
+                isvalied = false;
+            }
+            if (leavetype == null || leavetype == "" || leavetype == undefined) {
+                $(".errleavetype").show();
+                isvalied = false;
+            }
+
+            if (!isvalied)
+                return false;
+
+            if (new Date(fromdate) > new Date(todate)) {
+                toastr.warning("Please select validate date.")
+                return false;
+            }
+
+            //$("#PaidLeaveCount").val(NOD);
+
+            var data_form =
+            {
+                FromDate: fromdate,
+                ToDate: todate,
+                TotalLeaveDay: parseInt($("#diffday").val()),
+                LeaveType: leavetype,
+                PaidLeaveCount: $("#PaidLeaveCount").val(),
+                UnPaidLeaveCount: $("#UnPaidLeaveCount").val(),
+            }
+
+
+            $.ajax({
+                url: '/LeaveManagement/SaveLeave',
+                type: "POST",
+                dataType: 'json',
+                data: data_form,
+                success: function (result) {
+                    toastr.success(result.msg);
+                    window.location.reload();
+                },
+                error: function (err) {
+                    toastr.error("Fail!");
+                }
+
+            });
+        }
+
+        function DaysCalculate(sdate, edate) {
+            var From_Date = new Date(sdate);
+            var To_date = new Date(edate);
+
+            var Differen_SE_Date = From_Date.getTime() - To_date.getTime();
+
+            var Total_leave = Differen_SE_Date / (1000 * 3600 * 24);
+
+            return Math.round(Math.abs(Total_leave));
+        }
+
+
+    </script>

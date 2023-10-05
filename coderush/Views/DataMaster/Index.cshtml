@@ -1,0 +1,157 @@
+﻿@model List<DataMaster>
+@{ ViewData["Title"] = "Data"; }
+
+<style>
+    .shortspan {
+        display: inline-block;
+        width: 50px;
+        white-space: nowrap;
+        overflow: hidden !important;
+        text-overflow: ellipsis;
+    }
+</style>
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h1>
+            @ViewData["Title"]
+        </h1>
+        <p>
+            @await Html.PartialAsync(PartialView.StatusMessage, TempData[StaticString.StatusMessage])
+        </p>
+
+    </section>
+    <!-- Main content -->
+    <section class="content">
+        <!-- Default box -->
+        <div class="box">
+            <div class="box-header with-border">
+                <h3 class="box-title">List of Data item</h3>
+                <br />
+                <br />
+                <div class="row">
+                    <div class="col-md-4">
+                        <select name="type" class="form-control" style="" id="Serchkey" asp-items="@ViewBag.SelectionList">
+                            <option value="">-- ALL --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <a href="/DataMaster/index" class="btn btn-primary" id="Ancar">Search</a>
+                    </div>
+                    <div class="col-md-2">
+
+                    </div>
+                    <div class="col-md-2">
+
+                    </div>
+                    <div class="col-md-2">
+                        <div class="box-tools pull-right">
+                            <a href="/DataMaster/Form" class="btn btn-primary"><i class="fa fa-plus"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="box-body">
+                    <div class="table-responsive">
+                        <table id="grid" class="table table-striped" cellspacing="0" width="100%">
+                            <thead>
+                                <tr>
+                                    <th width="5%">Sr No.</th>
+                                    <th width="20%">Text</th>
+                                    <th width="10%">Description</th>
+                                    <th width="10%">Type</th>
+                                    <th width="10%">Is Active</th>
+                                    <th width="5%">Edit</th>
+                                    <th width="5%">Delete</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>
+                                            @item.Id
+                                        </td>
+                                        <td>
+                                            @item.Text
+                                        </td>
+                                        <td>
+                                            <p class="tooltips shortspan" data-placement="bottom" title="@item.Description"> @item.Description</p>
+                                        </td>
+                                        <td>
+                                            @item.Type
+                                        </td>
+                                        @*<td><span style="text-decoration-line:@(item.Isactive ? "line-through" : "none")">@item.Isactive</span></td>*@
+                                        <td>
+                                            <input type="checkbox" class="flat-red" @(item.Isactive ? "checked" : "") onclick="return false;">
+                                        </td>
+
+                                        <td>
+                                            <a href="/DataMaster/Form/@item.Id"><i class="fa fa-edit"></i></a>
+                                        </td>
+                                        <td>
+                                            <a href="/DataMaster/Delete/@item.Id"><i class="fa fa-trash"></i></a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+                <!-- /.box-body -->
+            </div>
+        </div>
+        <!-- /.box -->
+    </section>
+    <!-- /.content -->
+</div>
+<!-- /.content-wrapper -->
+
+
+
+@section Styles{
+    <!-- DataTables -->
+    <link rel="stylesheet" href="~/adminlte/components/datatables.net-bs/css/dataTables.bootstrap.min.css">
+}
+
+
+@section Scripts{
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- DataTables -->
+    <script src="~/adminlte/components/datatables.net/js/jquery.dataTables.min.js"></script>
+    <script src="~/adminlte/components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+    <!-- page script -->
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            $('#grid').DataTable({
+                lengthChange: false,
+                info: false,
+                searching: true,
+                dom: 'lrtip',
+                scrollX: false,
+                pageLength: 25,
+            });
+
+            //$(".tooltips").tooltip({
+            //    $(".tooltips").css("max-width: 100% !important")
+            //});
+
+             var number = parseInt(@ViewBag.key);
+            $('select option[value='+number+']').attr("selected", true);
+            $('#Serchkey').on('change', function (e) {
+                var searchvalue = $('#Serchkey').val();
+                var newUrl = "\Index?Searcvalue=" + searchvalue;
+                $("#Ancar").attr("href", newUrl); // Set herf value
+
+            });
+        });
+
+
+
+    </script>
+
+}

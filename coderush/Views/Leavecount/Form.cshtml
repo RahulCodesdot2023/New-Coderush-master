@@ -1,0 +1,211 @@
+﻿@using Microsoft.AspNetCore.Identity
+@model LeaveCountViewModel
+@inject UserManager<ApplicationUser> _userManager
+@{
+    ViewData["Title"] = "Leave Form";
+    var user = await _userManager.GetUserAsync(User);
+    var roles = await _userManager.GetRolesAsync(user);
+}
+
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h1>
+            @ViewData["Title"]
+        </h1>
+        <p>
+            @await Html.PartialAsync(PartialView.StatusMessage, TempData[StaticString.StatusMessage])
+        </p>
+
+    </section>
+    <!-- Main content -->
+    <section class="content">
+        <!-- Default box -->
+        <form asp-controller="LeaveCount" enctype="multipart/form-data" asp-action="SubmitForm" method="post">
+            <div class="box">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Create or edit existing Leave item</h3>
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse" data-toggle="tooltip"
+                                title="Collapse">
+                            <i class="fa fa-minus"></i>
+                        </button>
+                        <button type="button" class="btn btn-box-tool" data-widget="remove" data-toggle="tooltip" title="Remove">
+                            <i class="fa fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="box-body">
+                    <input type="hidden" asp-for="Id" />
+                    @if (roles.Contains("SuperAdmin") || roles.Contains("HR"))
+                    {
+                        <div class="form-group">
+                            <select name="Userid" id="leavedrpdwn" class="form-control" asp-items="@ViewBag.UserList"></select>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="form-group">
+                            <input id="levuserid" asp-for="UserName" class="form-control" readonly />
+                            <input type="hidden" id="hednid" asp-for="Userid" value="@user.Id" />
+                        </div>
+                    }
+                    <div class="form-group row">
+                        <div class="col-md-6">
+
+                            <label asp-for="Fromdate"></label>
+                            <input type="date" asp-for="Fromdate" id="levfrmdate" class="form-control" />
+                            <span asp-validation-for="Fromdate" class="text-danger"></span>
+                            @*<span class="text-danger hidespan spantext">Please enter Text</span>*@
+
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Todate"></label>
+                            <input id="levtodate" type="date" asp-for="Todate" class="form-control" />
+                            <span asp-validation-for="Todate" class="text-danger"></span>
+                            @*<span class="text-danger hidespan spantext">Please enter Text</span>*@
+                        </div>
+
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Count"></label>
+                        <input id="levcount" asp-for="Count" class="form-control" type="number" maxlength="15" readonly />
+                        <span asp-validation-for="Count" class="text-danger"></span>
+                        @*<span class="text-danger hidespan spantext">Please enter Text</span>*@
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="LeaveReason"></label>
+                        <select id="LeaveReason" name="LeaveReason" class="form-control" asp-items="@ViewBag.LeaveReason"></select>
+                        <span asp-validation-for="LeaveReason" class="text-danger"></span>
+                    </div>
+                    <div class="form-group" id="divOthers" style="display:none;">
+                        <label asp-for="LeaveOtherReason"></label>
+                        <input id="LeaveOtherReason" name="LeaveOtherReason" class="form-control"></input>
+                        <span asp-validation-for="LeaveOtherReason" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="EmployeeDescription"></label>
+                        <textarea asp-for="EmployeeDescription" rows="4" cols="50" type="text" id="levdescription" value="" class="form-control"></textarea>
+                        <span asp-validation-for="EmployeeDescription" class="text-danger"></span>
+                        @*<span class="text-danger hidespan spantext">Please enter Text</span>*@
+                    </div>
+                    @*@if (roles.Contains("SuperAdmin") || roles.Contains("HR"))
+                        {
+                        <div class="form-group">
+                        <label asp-for="Isapprove"></label>
+                        <input asp-for="Isapprove" type="checkbox" id="isaprv" class="flat-red" />
+                        </div>}*@
+                    <div class="form-group" style="display:none">
+                        <label>Isapprove</label>
+                        <input type="checkbox" id="isaprv" class="flat-red" />
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="FileUpload"></label>
+                        <input type="file" asp-for="FileUpload" class="form-control" />
+                        <span asp-validation-for="FileUpload" class="text-danger"></span>
+                        @*<span class="text-danger hidespan spantext">Please enter Text</span>*@
+                    </div>
+                    <div class="form-group">
+                        <label>Leave Type</label>
+                        <div class="form-group col-lg-12">
+                            <input type="radio" id="radiohalf" name="leavedaytype" value="1">
+                            <label>Half Day</label><br>
+                            <input type="radio" id="radiofull" checked name="leavedaytype" value="2">
+                            <label>Full Day</label><br>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.box-body -->
+                <div class="box-footer">
+                    <a href="/LeaveCount/LeaveIndex" class="btn btn-default">Back</a>
+                    <button type="submit" @*id="btninsert"*@ class="btn btn-primary">Save</button>
+                </div>
+                <!-- /.box-footer-->
+            </div>
+        </form>
+        <!-- /.box -->
+    </section>
+    <!-- /.content -->
+</div>
+<!-- /.content-wrapper -->
+@section Styles{
+    <!-- DataTables -->
+    <link rel="stylesheet" href="~/adminlte/components/datatables.net-bs/css/dataTables.bootstrap.min.css">
+}
+
+@section Scripts{
+    <partial name="_ValidationScriptsPartial" />
+    @* <script src="~/js/LeaveCount.js"></script>*@
+    <script type="text/javascript">
+        //$('#levfrmdate').on('change', function () {
+        //    var fdate = document.getElementById("levfrmdate").value;
+        //    let currentDate = new Date().toJSON().slice(0, 10);
+        //    if (fdate < currentDate) {
+        //        alert('To date should be greater than Yesterdays date.');
+        //        $('#levfrmdate').val('');
+        //    }
+        //});
+        $(document).ready(function () {
+            $('#levtodate').on('change', function () {
+                var fromdate = $('#levfrmdate').val();
+                var todate = $('#levtodate').val();
+
+                if (todate < fromdate) {
+                    toastr.warning('To date should be greater than From date.');
+                    $('#levtodate').val('');
+                }
+
+                // Parse the date strings into Date objects
+                var parsedFromDate = new Date(fromdate);
+                var parsedToDate = new Date(todate);
+
+                // Calculate the time difference in milliseconds
+                var timeDifference = parsedToDate - parsedFromDate;
+
+                // Convert milliseconds to days
+                var daysDifference = Math.floor(timeDifference / (1000 * 60 * 60 * 24)) + 1;
+
+                $("#levcount").empty();
+                $("#levcount").val(daysDifference);
+
+                if (fromdate == todate) {
+                    $("#radiofull").prop('checked', 'checked');
+                    $("#radiohalf").attr('disabled', false);
+                    $("#radiofull").attr('disabled', false);
+
+                }
+                else {
+                    $("#radiofull").prop('checked', 'checked');
+                    $("#radiofull").attr('disabled', false);
+                    $("#radiohalf").attr('disabled', true);
+                }
+            });
+
+            $("#LeaveReason").on("change", function () {
+                var lr = $("#LeaveReason :selected").text();
+                if (lr == 'Others') { $("#divOthers").removeAttr("style"); } else { $("#divOthers").attr("style", "display:none;"); }
+            });
+        });
+
+        function handleRadioChange() {
+            var halfDayRadio = document.getElementById('radiohalf');
+            var fullDayRadio = document.getElementById('radiofull');
+
+            if (halfDayRadio.checked) {
+                $("#levcount").val("0.5");
+            } else if (fullDayRadio.checked) {
+                $("#levcount").val("1");
+            }
+        }
+
+        // Set up event listener for radio button change
+        var radioElements = document.querySelectorAll('input[name="leavedaytype"]');
+        radioElements.forEach(function (radio) {
+            radio.addEventListener('change', handleRadioChange);
+        });
+
+    </script>
+
+
+}

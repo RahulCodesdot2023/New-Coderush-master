@@ -1,0 +1,129 @@
+﻿@model CodesDotHRMS.Models.Thoughts
+
+@{
+    ViewData["Title"] = "createnewthoughts";
+}
+<div class="content-wrapper">
+    <section class="content-header">
+        <h1>
+            @ViewData["Title"]
+        </h1>
+        <p>
+            @await Html.PartialAsync(PartialView.StatusMessage, TempData[StaticString.StatusMessage])
+        </p>
+    </section>
+
+
+    <div style="margin:1%">
+        <h4>Thoughts</h4>
+        <hr />
+        <div class="row">
+            <div class="col-md-6">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input asp-for="ThoughtsID" class="form-control" type="hidden" />
+                <div class="form-group col-md-4">
+                    <label asp-for="thoughts" class="control-label"></label>
+                    <input asp-for="thoughts" class="form-control" id="Thoughts" />
+
+                </div>
+                <div class="form-group col-md-4">
+                    <label asp-for="Day" class="control-label"></label>
+                    @*<input asp-for="Day" class="form-control" />*@
+                    <select class="form-control" asp-for="Day" id="ddlWeekdayList">
+                    </select>
+                </div>
+
+                <div class="form-group col-md-4">
+                    <button type="button" style="position: absolute; margin-top: 25px; margin-left: 10px;" class="btn btn-primary" onclick="btnsavethoughts();">Save</button>
+                </div>
+
+                <div class="form-group col-md-4">
+
+
+                    @*<inp asp-for="Day" class="form-control" />*@
+                    @*<input type="checkbox" class="form-control" id="Isactive" />*@
+
+
+                </div>
+            </div>
+        </div>
+
+        @*<div>
+            <a asp-action="Index">Back to List</a>
+        </div>*@
+
+    </div>
+</div>
+
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<script>
+    $(document).ready(function () {
+        getddlweekdays();
+    })
+
+    function getddlweekdays() {
+            
+        $.ajax({
+            url: "/Dashboard/Getweekday",
+            type: "GET",
+            data: {},
+            success: response => {
+               debugger
+                if (response.length > 0) {
+                        $("#ddlWeekdayList").empty();
+                        $("#ddlWeekdayList").append($("<option></option>").val("").html("Select Day"));
+                    $.each(response, function (i, v) {
+                        $("#ddlWeekdayList").append($("<option></option>").val(v.dayvalue).html(v.dayname));
+                    });
+                } else {
+                    $("#ddlWeekdayList").empty();
+                    $("#ddlWeekdayList").append($("<option></option>").val("").html("Select Day"));
+                }
+
+               
+            },
+            error: err => {
+
+                console.log(err);
+            }
+        });
+    }
+
+    function btnsavethoughts() {
+        var objdata = {
+            Thoughts: $('#Thoughts').val(),
+            day: $('#ddlWeekdayList').val(),
+           
+            
+        }
+       
+
+        $.ajax({
+            url: "/Dashboard/addathoughts",
+            type: "Post",
+            data: objdata,
+            dataType: "json",
+            success: function (result, status, xhr) {
+
+                toastr.success('Data Save');
+                cleartextbox();
+                window.location.href = '/Dashboard/Home/' + status;
+            },
+            error: function () {
+                toastr.error('No Data Found');
+                
+            }
+
+        })
+
+    }
+
+    function cleartextbox() {
+        $('#Thoughts').val("");
+        $('#ddlWeekdayList').val("");
+    }
+
+</script>
+

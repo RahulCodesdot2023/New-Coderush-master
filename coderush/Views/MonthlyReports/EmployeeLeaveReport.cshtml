@@ -1,0 +1,157 @@
+﻿@using coderush.Models
+@using Microsoft.AspNetCore.Identity
+
+@inject UserManager<ApplicationUser> _userManager
+@{
+    ViewData["Title"] = "Employee Attendance";
+    var user = await _userManager.GetUserAsync(User);
+    var roles = await _userManager.GetRolesAsync(user);
+}
+
+
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h1>
+            @ViewData["Title"]
+        </h1>
+        <p>
+            @await Html.PartialAsync(PartialView.StatusMessage, TempData[StaticString.StatusMessage])
+        </p>
+
+    </section>
+    <!-- Main content //Harshal working on-->
+    <section class="content">
+        @Html.AntiForgeryToken()
+        <!-- Default box -->
+        <div class="box">
+            <div class="box-header with-border">
+                <h3 class="box-title">Employee Attendance</h3>
+            </div>
+            <div>
+                <input type="hidden" id="txtRole" value="@(roles.Contains("SuperAdmin").ToString() ?? roles.Contains("HR").ToString())">
+                <input type="hidden" id="txtUserId" value="@user.Id">
+                <input type="hidden" id="leavcountuserId" value="@ViewBag.leavcountId">
+
+
+            </div>
+            <div class="box-body">
+                @if (roles.Contains("SuperAdmin") || roles.Contains("HR"))
+                {
+                    <div class="form-group">
+                        <label> Employee Name: </label>
+                        <select name="Userid" id="chartdrpdown" class="form-control" asp-items="@ViewBag.UserList"></select>
+                    </div>
+                }
+                else
+                {
+                    <div class="form-group">
+                        <label> Name: </label>
+                        <select type="hidden" name="Userid" id="chartdrpdown" class="form-control" disabled>
+                            <option value="@user.Id">@user.FirstName @user.LastName</option>
+                        </select>
+                    </div>
+                }
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label> Month: </label>
+                            <select id="drpmonths" class="form-control"></select>
+                        </div>
+                        <div class="col-md-6">
+                            <label> Year: </label>
+                            <select id="yearDropdown" class="form-control"></select>
+                        </div>
+                    </div>
+                </div>
+                <div class="" id="empReport">
+                </div>
+                <div style="text-align: center" class="form-group">
+                    <canvas id="barcanvas"></canvas>
+                </div>
+            </div>
+            <!-- /.box-body -->
+        </div>
+
+        <!-- /.box -->
+    </section>
+    <!-- /.content -->
+</div>
+
+@section Scripts{
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.3.0/Chart.bundle.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    @*<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>*@
+    <script>
+
+        // Get the current year
+        var currentYear = new Date().getFullYear();
+        var selectElement = document.getElementById("yearDropdown");
+
+        // Add the "Select" option
+        var selectOption = document.createElement("option");
+        selectOption.value = ""; // Set the value to an empty string or any appropriate value
+        selectOption.text = "Select";
+        selectElement.appendChild(selectOption);
+
+        // Populate the year dropdown with a range of years
+        for (var i = currentYear; i >= currentYear - 10; i--) {
+            var option = document.createElement("option");
+            option.value = i;
+            option.text = i;
+            selectElement.appendChild(option);
+        }
+
+        selectElement.value = "";
+
+        // Populate the month dropdown with month names
+        var monthNames = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
+
+        for (var i = 0; i < monthNames.length; i++) {
+            var option = document.createElement("option");
+            option.value = i + 1; // Month value starts from 1
+            option.text = monthNames[i];
+            document.getElementById("drpmonths").appendChild(option);
+        }
+
+        $("#chartdrpdown").change(function () {
+            selectElement.value = "";
+        });
+
+        $("#drpmonths").change(function () {
+            selectElement.value = "";
+        });
+
+        $("#yearDropdown").change(function () {
+            var chartdrpdown = $("#chartdrpdown").val();
+            var drpmonth = $("#drpmonths").val();
+            var yearDropdown = $("#yearDropdown").val();
+            bindEmployeeData(chartdrpdown, drpmonth, yearDropdown);
+        });
+
+        function bindEmployeeData(chartdrpdown, drpmonth, yearDropdown) {
+            $.get('/MonthlyReports/EmployeeAttendanceInfo?id=' + chartdrpdown + '&month=' + drpmonth + '&year=' + yearDropdown, function (data) {
+                $("#empReport").html(data);
+
+                $("#empReport").on("load", "#grid", function () {
+                    $('#grid').DataTable({
+                        lengthChange: false,
+                        info: false,
+                        searching: true,
+                        dom: 'lrtip',
+                        scrollX: true,
+                        pageLength: 15,
+                    });
+
+                });
+
+
+
+            });
+        }
+    </script>
+}

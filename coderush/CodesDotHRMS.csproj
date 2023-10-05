@@ -1,0 +1,57 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UserSecretsId>aspnet-coderush-32FBA6D7-1F1A-4E19-BE2A-1C1E45E3EA2F</UserSecretsId>
+    <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
+    <TypeScriptToolsVersion>3.3</TypeScriptToolsVersion>
+  </PropertyGroup>
+
+
+  <ItemGroup>
+    <PackageReference Include="ClosedXML" Version="0.96.0" />
+    <PackageReference Include="EPPlus" Version="6.2.4" />
+    <PackageReference Include="Google.Apis" Version="1.57.0" />
+    <PackageReference Include="Google.Apis.Auth" Version="1.57.0" />
+    <PackageReference Include="Google.Apis.Core" Version="1.57.0" />
+    <PackageReference Include="Google.Apis.Drive.v3" Version="1.57.0.2789" />
+    <PackageReference Include="GoogleApi" Version="4.2.5" />
+    <PackageReference Include="MailKit" Version="4.0.0" />
+    <PackageReference Include="Microsoft.AspNet.SignalR" Version="2.4.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.22" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="3.1.19" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.22" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.22">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.22" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.22">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Office.Interop.Access.Dao" Version="15.0.4420.1017" />
+    <PackageReference Include="Microsoft.Office.Interop.Excel" Version="15.0.4795.1000" />
+    <PackageReference Include="Microsoft.Office.Interop.Graph" Version="15.0.4420.1017" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.5" />
+    <PackageReference Include="MimeKit" Version="4.0.0" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <Folder Include="wwwroot\document\Attendance\" />
+    <Folder Include="wwwroot\document\Candidate\" />
+    <Folder Include="wwwroot\document\Lead\" />
+    <Folder Include="wwwroot\document\Todo\" />
+    <Folder Include="wwwroot\document\Userimage\" />
+    <Folder Include="wwwroot\js\signalr\dist\browser\" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <None Include="wwwroot\adminlte\plugins\signalr\dist\browser\signalr.js" />
+    <None Include="wwwroot\adminlte\plugins\signalr\dist\browser\signalr.min.js" />
+  </ItemGroup>
+
+</Project>

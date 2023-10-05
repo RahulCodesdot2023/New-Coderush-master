@@ -1,0 +1,386 @@
+﻿@model List<CodesDotHRMS.Models.ViewModels.LeaveManagementViewModel>
+@using Microsoft.AspNetCore.Identity
+@using System.Globalization
+@inject UserManager<ApplicationUser> _userManager
+
+@{
+    ViewData["Title"] = "LeaveManagIndex";
+    var user = await _userManager.GetUserAsync(User);
+    var roles = await _userManager.GetRolesAsync(user);
+
+}
+
+@*@inject UserManager<ApplicationUser> _userManager
+
+    @{
+        ViewData["Title"] = "LeaveManagement";
+        var user = await _userManager.GetUserAsync(User);
+        var roles = await _userManager.GetRolesAsync(user);
+
+    }*@
+<style>
+    .shortspan {
+        display: inline-block;
+        width: 50px;
+        white-space: nowrap;
+        overflow: hidden !important;
+        text-overflow: ellipsis;
+    }
+
+    .tooltip-inner {
+        max-width: 500px;
+        display: inline-block;
+        word-break: break-all;
+        overflow-wrap: break-word;
+    }
+
+    .excelbtn {
+        margin-right: 10px;
+    }
+</style>
+
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        @* <h1>
+        @ViewData["Title"]
+        </h1>*@
+        @* <p>
+        @await Html.PartialAsync(PartialView.StatusMessage, TempData[StaticString.StatusMessage])
+        </p>*@
+
+    </section>
+    <!-- Main content -->
+    <section class="content">
+
+        <div class="box">
+            <div class="box-header with-border">
+                <h3 class="box-title">Paid Leave Management</h3>
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse" data-toggle="tooltip" title="Collapse">
+                        <i class="fa fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" data-widget="remove" data-toggle="tooltip" title="Remove">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="box-body">
+                <div class="table-responsive">
+                    <table id="plgrid" class="table table-striped" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th width="15%">Name</th>
+                                <th width="15%">From Date</th>
+                                <th width="15%">To Date</th>
+                                <th width="15%">Paid Leave Count</th>
+                                <th width="15%">UnPaid Leave Count</th>
+                                <th width="15%">Paid Leaves Left</th>
+                                <th width="15%">Monthly Paid Leave Left</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        @item.FullName
+                                    </td>
+                                    <td>
+                                        @item.FromDate
+                                    </td>
+                                    <td>
+                                        @item.ToDate
+                                    </td>
+                                    <td>
+                                        @item.PaidLeaveCount
+                                    </td>
+                                    <td>
+                                        @item.UnPaidLeaveCount
+                                    </td>
+                                    <td>
+                                        @item.LeaveBuket
+                                    </td>
+                                    <td>
+                                        @item.IsMonthlyLeaveLeft
+                                    </td>
+
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- /.box-body -->
+        </div>
+
+ @*<!-- Default box -->
+        <div class="box">
+
+            <div class="box-header with-border">
+                <h3 class="box-title">List of LeaveManagement</h3>
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse" data-toggle="tooltip" title="Collapse">
+                        <i class="fa fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" data-widget="remove" data-toggle="tooltip" title="Remove">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+                <br />
+                <br />
+                <div class="row">
+                    <div class="col-md-10"></div>
+                    <div class="col-md-2">
+                        <div class="box-tools pull-right">
+                            <a href="/LeaveManagement/AddLeaveIndex" class="btn btn-primary"><i class="fa fa-plus"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="box-body">
+                <div class="table-responsive">
+                    <table id="grid" class="table table-striped" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th width="10%">From Date</th>
+                                <th width="20%">To Date</th>
+                                @*<th width="5%">Total Leave Day</th>*@
+                                @*<th width="10%">Leave Type</th>
+                                <th width="10%">Paid Leave Count</th>
+                                <th width="15%">UnPaid Leave Count</th>
+                                <th width="10%">Leave Status</th>
+                                <th width="10%">Leave Reason</th>
+                                <th width="15%">Action</th>*@
+                            @*</tr>
+                        </thead>
+                        <tbody>*@
+                            @*@foreach (var item in Model)
+                            {
+                                <tr>*@
+                                    @*<td>
+                                        @item.FromDate
+                                    </td>
+                                    <td>
+                                        @item.ToDate
+                                    </td>
+                                    @*  <td>
+                                <p class="tooltips shortspan" data-placement="bottom" title="@item.Description"> @item.Description</p>
+                                </td>*@
+                                    @*<td>
+                                        @(item.LeaveType == 1 ? "Half Day" : item.LeaveType == 2 ? "Full Day" : "")
+                                    </td>
+                                    <td>
+                                        @item.PaidLeaveCount
+                                    </td>
+                                    <td>
+                                        @item.UnPaidLeaveCount
+                                    </td>
+                                    <td>*@
+                                        @*@(item.LeaveStatusName)
+                                    </td>
+                                    <td>
+                                        @item.LeaveReason
+                                    </td>*@
+                                    @*<td>
+                                        @{
+                                            if (item.LeaveStatus == (int)coderush.DataEnum.LeaveStatus.Inprogress && roles.Contains("HR") && roles.Contains("SuperAdmin"))
+                                            {
+                                                <button type="button" class="btn btn-primary" onclick="btnaccept(@item.LeaveManagementId)">Accept</button>
+                                                <button type="button" class="btn btn-primary" onclick="btnreject(@item.LeaveManagementId)">Reject</button>
+                                            }
+                                        }
+                                    </td>*@
+
+                                @*</tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+            <!-- /.box-body -->
+        </div>*@
+        <!-- /.box -->
+    </section>
+    <!-- /.content -->
+</div>
+
+
+<div class="modal" tabindex="-1" id="confirmrejectedleav" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <input name="IsValid" type="hidden" id="hdnLeaveId" />
+                Are you sure you are Rejected Leave ?
+            </div>
+            <div class="modal-footer">
+                <button type="button" data-dismiss="modal" onclick="Yesreject()" class="btn btn-primary">Yes</button>
+                <button type="button" data-dismiss="modal" class="btn">No</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" tabindex="-1" id="confirmacceptedleave" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <input name="IsValid" type="hidden" id="hdnLeaveId" />
+                Are you sure you are Accept Leave ?
+            </div>
+            <div class="modal-footer">
+                <button type="button" data-dismiss="modal" onclick="Yesaccept()" class="btn btn-primary">Yes</button>
+                <button type="button" data-dismiss="modal" class="btn">No</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="myleaveModal" role="dialog" tabindex="-1">
+    <div class="modal-dialog" role="document">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Leave Reason</h4>
+            </div>
+            <div class="modal-body">
+                <input name="IsValid" type="hidden" id="leaveid" />
+                <div class="form-group col-md-12">
+                    <label>Leave Reason :</label>
+                    <textarea type="text" TextMode="MultiLine" rows="5" cols="10" class="form-control" id="Leavereason"></textarea>
+                    <span class="text-danger" id="resonrequired">Leave Reason is required.</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="savelevreason" data-dismiss="modal">Save</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /.content-wrapper -->
+@section Styles{
+    <!-- DataTables -->
+    <link rel="stylesheet" href="~/adminlte/components/datatables.net-bs/css/dataTables.bootstrap.min.css">
+}
+
+
+@section Scripts{
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- DataTables -->
+    <script src="~/adminlte/components/datatables.net/js/jquery.dataTables.min.js"></script>
+    <script src="~/adminlte/components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+
+
+    <!-- page script -->
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            //$('#grid').DataTable({
+            //    lengthChange: false,
+            //    info: false,
+            //    searching: true,
+            //    dom: 'lrtip',
+            //    scrollX: false,
+            //    pageLength: 10,
+            //});
+
+
+            $('#plgrid').DataTable({
+                lengthChange: false,
+                info: false,
+                searching: true,
+                dom: '<lf<t>ip>',
+                scrollX: true,
+                pageLength: 10,
+            });
+
+
+        @*var number = parseInt(@ViewBag.key);
+            $('select option[value=' + number + ']').attr("selected", true);
+            $('#Serchkey').on('change', function (e) {
+            var searchvalue = $('#Serchkey').val();
+            var newUrl = "\Index?Searcvalue=" + searchvalue;
+            $("#Ancar").attr("href", newUrl); // Set herf value
+
+            });*@
+
+                $("#savelevreason").click(function () {
+                    $(".text-danger").hide();
+                    var Id = $("#leaveid").val();
+                    var Leavereason = $("#Leavereason").val();
+
+                    if (Leavereason == '') {
+                        $("#resonrequired").show();
+                        return false;
+                    }
+
+                    $.ajax({
+                        type: "POST",
+                        url: "/LeaveManagement/SaveLeaveReason",
+                        data: { "Id": Id, "Leavereason": Leavereason },
+                        success: function (response) {
+                            if (response.success == "true") {
+                                toastr.success(response.message);
+                            }
+                            location.reload(true);
+                        },
+                        error: function (response) {
+                            toastr.error(response.message);
+                        }
+                    });
+                });
+        });
+
+        function Yesaccept() {
+
+            $.ajax({
+                url: "/LeaveManagement/SaveLeaveAccept?Id=" + $("#hdnLeaveId").val(),
+                type: "Post",
+                data: {},
+                success: function (data) {
+                    if (data.success == "true") {
+                        toastr.success(data.message);
+                    }
+                    location.reload(true);
+                },
+                error: function (data) {
+                    toastr.error(data.message);
+                }
+            });
+        }
+
+        function btnreject(LeaveManagementId) {
+            $('#confirmrejectedleav').modal('show');
+            $("#hdnLeaveId").val(LeaveManagementId);
+
+        }
+
+        function btnaccept(LeaveManagementId) {
+            $('#confirmacceptedleave').modal('show');
+            $("#hdnLeaveId").val(LeaveManagementId);
+        }
+
+        function Yesreject() {
+            $(".text-danger").hide();
+            $("#Leavereason").val("");
+            $('#myleaveModal').modal('show');
+            $("#leaveid").val($("#hdnLeaveId").val());
+        }
+
+    </script>
+
+}
+

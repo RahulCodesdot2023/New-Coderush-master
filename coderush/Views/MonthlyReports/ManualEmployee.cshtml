@@ -1,0 +1,87 @@
+﻿@model List<CodesDotHRMS.Models.ViewModels.EmployeAttedenceReportVM>
+@using Microsoft.AspNetCore.Identity
+@using coderush.Data
+
+@inject UserManager<ApplicationUser> _userManager
+@inject ApplicationDbContext _context
+
+@{
+    ViewData["Title"] = "Employee Attendance";
+    var user = await _userManager.GetUserAsync(User);
+    var roles = await _userManager.GetRolesAsync(user);
+    var alluser = _context.ApplicationUser.ToList();
+}
+
+@{
+    Layout = null;
+}
+
+<table id="grid" class="table table-bordered" cellspacing="0" width="100%">
+    <thead>
+        <tr>
+            <th>Day</th>
+            <th>ArrTim</th>
+            <th>Out1</th>
+            <th>In2</th>
+            <th>Out2</th>
+            <th>In3</th>
+            <th>Out3</th>
+            <th>In4</th>
+            <th>Out4</th>
+            <th>In5</th>
+            <th>Out5</th>
+            <th>In6</th>
+            <th>Out6</th>
+            <th>In7</th>
+            <th>DepTime</th>
+            <th>Working Hrs</th>
+            <th>Report Type</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            if (Model != null)
+            {
+                var repoType = "";
+                var clsStatusName = "";
+                @foreach (var dt in Model)
+                {
+                    if (dt.ReportType == 0)
+                    {
+                        repoType = "Manual";
+                        clsStatusName = "bg-danger";
+                    }
+                    else
+                    {
+                        repoType = "Auto";
+                        clsStatusName = "bg-success";
+                    }
+
+                    <tr class="@(clsStatusName)">
+                        <td>@dt.Day</td>
+                        <td>@dt.ArrTim</td>
+                        <td>@dt.Out1</td>
+                        <td>@dt.In2</td>
+                        <td>@dt.Out2</td>
+                        <td>@dt.In3</td>
+                        <td>@dt.Out3</td>
+                        <td>@dt.In4</td>
+                        <td>@dt.Out4</td>
+                        <td>@dt.In5</td>
+                        <td>@dt.Out5</td>
+                        <td>@dt.In6</td>
+                        <td>@dt.Out6</td>
+                        <td>@dt.In7</td>
+                        <td>@dt.DepTim</td>
+                        <td>@(dt.WorkingHrs=(dt.Out1-dt.ArrTim)+ (dt.Out2 - dt.In2)+ (dt.Out3 - dt.In3)+ (dt.Out4 - dt.In4)+ (dt.Out5 - dt.In5) + (dt.Out6 - dt.In6) + (dt.DepTim - dt.In7))</td>
+                        <td>@repoType</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr><td colspan="17" class="text-center">No-data found</td></tr>
+            }
+        }
+    </tbody>
+</table>

@@ -1,0 +1,211 @@
+﻿@model IEnumerable<CodesDotHRMS.Models.Thoughts>
+@using Microsoft.AspNetCore.Identity
+@using System.Globalization
+@inject UserManager<ApplicationUser> _userManager
+
+
+
+@{ ViewData["Title"] = "Home";
+
+    var user = await _userManager.GetUserAsync(User);
+    var roles = await _userManager.GetRolesAsync(user); }
+
+
+<div class="content-wrapper">
+
+    <section class="content-header">
+        <h1>
+            @ViewData["Title"]
+        </h1>
+        <p>
+            @await Html.PartialAsync(PartialView.StatusMessage, TempData[StaticString.StatusMessage])
+        </p>
+    </section>
+    <section class="content">
+        <!-- Default box -->
+        <div class="box">
+            <div style="margin:1%">
+
+                <div class="box-body">
+                    <div class="row">
+                        &nbsp;&nbsp;
+                        <input id="MyInput" type="text" placeholder="Search.." /> &nbsp;
+                        <select class="form-control col-lg-4" id="ddlWeekdayList" style="width: 20%;">
+                        </select>&nbsp;
+                        <button class="btn btn-primary" id="btnSearch" onclick="searchbtn();">Search</button>
+                        <button id="clear" class="btn btn-primary" onclick="clear();">Clear</button>
+                        <a href="/Dashboard/createnewthoughts" class="btn btn-primary" style="margin-left: 59%;"> <i class="fa fa-plus"></i> </a>
+                        </div>
+                    </div>
+
+
+
+                    @*<a href="/Dashboard/Home" class=""><i class="fa fa-backward"></i> &nbsp; Back to Home </a>*@
+                    @*<a href="/Dashboard/createnewthoughts" class="btn btn-primary" style="margin-left: 59%;"> <i class="fa fa-plus"></i> </a>*@
+                    <div class="box-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped" id="thoughtsTbl">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            Thought
+                                        </th>
+                                        <th>
+                                            Day
+                                        </th>
+                                        <th>
+                                            IsActive
+                                        </th>
+
+                                    </tr>
+                                </thead>
+                                <tbody id="tbl_ThougtList">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+        </div>
+    </section>
+</div>
+
+
+
+@section Styles{
+    <!-- DataTables -->
+    <link rel="stylesheet" href="~/adminlte/components/datatables.net-bs/css/dataTables.bootstrap.min.css">
+}
+
+@section Scripts{
+
+    <!-- DataTables -->
+    <script src="~/adminlte/components/datatables.net/js/jquery.dataTables.min.js"></script>
+    <script src="~/adminlte/components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+    @*<script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.min.js"></script>*@
+    <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    @*<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>*@
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            //getddlweekdays();
+            //ThoughtsGrid();
+            //GetThougtList();
+            ThoughtsGrid();
+
+        });
+
+        function searchbtn() {
+
+            $('#MyInput').val();
+            $('#ddlWeekdayList').val();
+            ThoughtsGrid();
+        }
+        getddlweekdays();
+
+        function ThoughtsGrid() {
+            var selectday = $('#ddlWeekdayList').val() == "null" ? null : $('#ddlWeekdayList').val();
+            $('#thoughtsTbl').DataTable({
+
+                destroy: false,
+                retrieve: true,
+                searching: false,
+                //lengthChange: false,
+                //info: false,
+                //searching: true,
+                //dom: 'lrtip',
+                //scrollX: false,
+                //pageLength: 25,
+                "order": [[2, "desc"]],
+                ajax: {
+                    url: "/Dashboard/GetThoughtList?myinput=" + $('#MyInput').val() + "&ddlWeekday=" + selectday,
+                    type: "Get",
+                    data: {},
+                }
+                ,
+                columns:
+                    [
+                        {
+                            data: "thoughtName",
+                            name: "ThoughtName",
+                            autowidth: false
+                        },
+                        { data: "dayName", name: "Day", autowidth: false },
+                        {
+                            data: "isactive", name: "Isactive", autowidth: false, render: function (Data, type, row) {
+                                var ischecked = Data ? "checked" : "";
+                                return "<input type='checkbox' class='flat-red' onchange='thoughtscheckbox(" + row.thoughttId + " , \"" + row.day + "\")'" + ischecked + "'  />"
+                                //return "<input type='checkbox' class='flat-red' onchange='thoughtscheckbox (" + row.thoughttId + ")'" + ischecked + "  />"
+                            }
+                        },
+
+                    ],
+
+                //drawCallback: function (setting, Json) {
+
+                //},
+
+            });
+        }
+
+
+        function getddlweekdays() {
+            $.ajax({
+                url: "/Dashboard/Getweekday",
+                type: "GET",
+                data: {},
+                success: response => {
+                    debugger
+                    if (response.length > 0) {
+                        $("#ddlWeekdayList").empty();
+                        $("#ddlWeekdayList").append($("<option></option>").val("null").html("Select Day"));
+                        $.each(response, function (i, v) {
+                            $("#ddlWeekdayList").append($("<option></option>").val(v.dayvalue).html(v.dayname));
+                        });
+                    } else {
+                        $("#ddlWeekdayList").empty();
+                        $("#ddlWeekdayList").append($("<option></option>").val("null").html("Select Day"));
+                    }
+
+
+                },
+                error: err => {
+
+                    console.log(err);
+                }
+            });
+        }
+
+
+        function clear() {
+            $("#ddlWeekdayList").val("");
+            $("#myInput").val("");
+        }
+
+
+        //$("#clear").click(function () {
+        //    $("#ddlWeekdayList").val("");
+        //    $("#myInput").val("");
+
+        //});
+
+        function thoughtscheckbox(ThoughtsID, day) {
+            $.ajax({
+                url: "/Dashboard/checkboxcheck?ThoughtsID=" + ThoughtsID + "&Day=" + day,
+                type: "Get",
+                dataType: "json",
+                contentType: "application/json;charset=utf-8;",
+                success: function (responce) {
+
+                    ThoughtsGrid();
+
+                },
+                error: function () {
+                    toastr.error('Data not found');
+                }
+            })
+
+
+        }
+
+    </script>
+}

@@ -1,0 +1,201 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using coderush.Data
+
+@inject UserManager<ApplicationUser> _userManager
+@inject ApplicationDbContext _context
+
+@{
+    ViewData["Title"] = "Payroll Management";
+    var user = await _userManager.GetUserAsync(User);
+    var roles = await _userManager.GetRolesAsync(user);
+    var alluser = _context.ApplicationUser.ToList();
+}
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<style>
+    h1 {
+        color: #F3F3F3;
+    }
+
+    /* toggle in label designing */
+    .toggle {
+        position: relative;
+        display: inline-block;
+        width: 85px;
+        height: 32px;
+        background-color: #F3F3F3;
+        border-radius: 30px;
+        border: 2px solid #3c8dbc;
+    }
+
+        .toggle p {
+            margin: 3px 2px;
+            padding: 1px 5px;
+        }
+        /* After slide changes */
+        .toggle:after {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 26px;
+            border-radius: 50%;
+            background-color: #3c8dbc;
+            top: 1px;
+            left: 1px;
+            transition: all 0.7s;
+        }
+
+    /* Toggle text */
+    p {
+        font-family: Arial, Helvetica, sans-serif;
+        font-weight: bold;
+    }
+
+    /* Checkbox checked effect */
+    .checkbox:checked + .toggle::after {
+        left: 49px;
+    }
+
+    /* Checkbox checked toggle label bg color */
+    .checkbox:checked + .toggle {
+        background-color: #F3F3F3;
+    }
+
+    /* Checkbox vanished */
+    .checkbox {
+        display: none;
+    }
+</style>
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h3>
+            @ViewData["Title"]
+            <div class="box-tools pull-right" style="display: flex; align-items: center; gap: 10px;font-size: initial;">
+                <input type="checkbox" id="switch" class="checkbox">
+                REG <label for="switch" class="toggle"></label>WFH
+            </div>
+        </h3>
+        <p>
+            @await Html.PartialAsync(PartialView.StatusMessage, TempData[StaticString.StatusMessage])
+        </p>
+
+    </section>
+    <!-- Main content -->
+    <section class="content">
+        <!-- Default box -->
+        <div class="box">
+            <div class="box-header with-border">
+                <h3 class="box-title">List of active member</h3>
+            </div>
+            <div class="box-body">
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label> Month: </label>
+                            <select id="drpmonths" class="form-control"></select>
+                        </div>
+                        <div class="col-md-6">
+                            <label> Year: </label>
+                            <select id="yearDropdown" class="form-control"></select>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive" id="EmployeeData">
+                </div>
+            </div>
+        </div>
+
+        <!-- /.box-body -->
+    </section>
+</div>
+<!-- /.box -->
+<!-- /.content -->
+@section Styles{
+    <!-- DataTables -->
+    <link rel="stylesheet" href="~/adminlte/components/datatables.net-bs/css/dataTables.bootstrap.min.css">
+}
+
+@section Scripts{
+    <script src="~/adminlte/components/datatables.net/js/jquery.dataTables.min.js"></script>
+    <script src="~/adminlte/components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+    <script type="text/javascript">
+        // Get the current year
+        var currentYear = new Date().getFullYear();
+        var selectElement = document.getElementById("yearDropdown");
+        // Add the "Select" option
+        var selectOption = document.createElement("option");
+        selectOption.value = ""; // Set the value to an empty string or any appropriate value
+        selectOption.text = "Select";
+        selectElement.appendChild(selectOption);
+
+        // Populate the year dropdown with a range of years
+        for (var i = currentYear; i >= currentYear - 10; i--) {
+            var option = document.createElement("option");
+            option.value = i;
+            option.text = i;
+            selectElement.appendChild(option);
+        }
+
+        selectElement.value = "";
+
+        var drpmonth = "";
+        var yearDropdown = "";
+        var isChecked = false;
+        $("#switch").change(function () {
+            isChecked = $(this).prop('checked');
+            if (isChecked) {
+                bindEmployeeData(drpmonth, yearDropdown, true);
+            }
+            else {
+                bindEmployeeData(drpmonth, yearDropdown, false);
+            }
+        });
+
+        // Populate the month dropdown with month names
+        var monthNames = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
+
+        for (var i = 0; i < monthNames.length; i++) {
+            var option = document.createElement("option");
+            option.value = i + 1; // Month value starts from 1
+            option.text = monthNames[i];
+            document.getElementById("drpmonths").appendChild(option);
+        }
+
+        $("#chartdrpdown").change(function () {
+            selectElement.value = "";
+        });
+
+        $("#drpmonths").change(function () {
+            selectElement.value = "";
+        });
+
+        $("#yearDropdown").change(function () {
+            var drpempcode = $("#chartdrpdown").val();
+            drpmonth = $("#drpmonths").val();
+            yearDropdown = $("#yearDropdown").val();
+            bindEmployeeData(drpmonth, yearDropdown, isChecked);
+        });
+
+
+
+
+        function bindEmployeeData(drpmonth, yearDropdown, isWfh) {
+            $.get("/Payroll/EmployeeInfo?month=" + drpmonth + '&year=' + yearDropdown + '&isWFH=' + isWfh, function (data) {
+                $("#EmployeeData").html(data);
+                $('#grid').DataTable({
+                    lengthChange: false,
+                    info: false,
+                    searching: true,
+                    dom: 'lrtip',
+                    scrollX: true,
+                    pageLength: 15,
+                });
+            });
+        }
+    </script>
+}

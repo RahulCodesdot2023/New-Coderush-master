@@ -1,0 +1,589 @@
+﻿@using Microsoft.AspNetCore.Identity
+
+@inject UserManager<ApplicationUser> _userManager
+
+@{
+    ViewData["Title"] = "Employee Master";
+    var user = await _userManager.GetUserAsync(User);
+    var roles = await _userManager.GetRolesAsync(user);
+            // Get the roles for the user
+}
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<style>
+    h1 {
+        color: #F3F3F3;
+    }
+
+    /* toggle in label designing */
+    .toggle {
+        position: relative;
+        display: inline-block;
+        width: 85px;
+        height: 32px;
+        background-color: #F3F3F3;
+        border-radius: 30px;
+        border: 2px solid #3c8dbc;
+    }
+
+        .toggle p {
+            margin: 3px 2px;
+            padding: 1px 5px;
+        }
+        /* After slide changes */
+        .toggle:after {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 26px;
+            border-radius: 50%;
+            background-color: #3c8dbc;
+            top: 1px;
+            left: 1px;
+            transition: all 0.7s;
+        }
+
+    /* Toggle text */
+    p {
+        font-family: Arial, Helvetica, sans-serif;
+        font-weight: bold;
+    }
+
+    /* Checkbox checked effect */
+    .checkbox:checked + .toggle::after {
+        left: 49px;
+    }
+
+    /* Checkbox checked toggle label bg color */
+    .checkbox:checked + .toggle {
+        background-color: #F3F3F3;
+    }
+
+    /* Checkbox vanished */
+    .checkbox {
+        display: none;
+    }
+</style>
+
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h3>
+            @ViewData["Title"]
+            <a href="#" id="monthlyReport" class="btn btn-primary pull-right" style="margin-right: 2px;"><i class="fa fa-file"></i> Import Monthly Report</a>
+            <a href="#" id="employeeImt" class="btn btn-primary pull-right" style="margin-right: 2px;"><i class="fa fa-file"></i> Import Employees</a>
+            <a href="#" id="seedData" class="btn btn-primary pull-right" style="margin-right: 2px;"><i class="fa fa-cog"></i> Seed Data</a>
+        </h3>
+        <p>
+            @await Html.PartialAsync(PartialView.StatusMessage, TempData[StaticString.StatusMessage])
+        </p>
+
+    </section>
+    <!-- Main content -->
+    <section class="content">
+        <!-- Default box -->
+        <div class="box">
+            <div class="box-header with-border">
+                <h3 class="box-title">List of member</h3>
+                <div class="box-tools pull-right">
+                    @*<button type="button" onclick="Salary()" class="btn btn-primary" id="mybutton">Add Salary</button>*@
+                    <div class="box-tools" style="display: flex; align-items: center; gap: 10px;">
+                    <a href="/EmployeeMaster/Register" class="btn btn-primary"><i class="fa fa-plus"></i></a>
+                    <a href="#" id="openlead" class="btn btn-primary"><i class="fa fa-file"></i></a>
+                        <input type="checkbox" id="switch" class="checkbox">
+                        REG <label for="switch" class="toggle"></label>WFH
+                    </div>
+                </div>
+            </div>
+            <div class="box-body">
+                <div class="table-responsive" id="EmployeeData">
+                </div>
+            </div>
+            <!-- /.box-body -->
+        </div>
+        <!-- /.box -->
+    </section>
+    <!-- /.content -->
+</div>
+<!-- /.content-wrapper -->
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Salary</h4>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th width="25%">Members Name</th>
+                                <th width="25%">Amount </th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="notebody">
+                        </tbody>
+                    </table>
+
+                    <button type="button" id='save' class='btn btn-primary pull-right'>  Save </button>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+<div class="container">
+    <!-- Modal -->
+    <div class="modal fade" id="myModalpl" role="dialog">
+        <div class="row">
+            <div class="col-md-8">
+                <section class="content">
+                    @Html.AntiForgeryToken()
+                    <!-- Default box -->
+                    <div class="box">
+                        <div class="box-header with-border">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4 class="modal-title">Leaves Details</h4>
+                        </div>
+                        <div><input type="hidden" id=""></div>
+                        <div class="box-body">
+                            @*@if (roles.Contains("SuperAdmin") || roles.Contains("HR"))
+                            {
+                            <div class="form-group">
+                            <select name="Userid" id="leavedrpdwn" class="form-control" asp-items="@ViewBag.UserList"></select>
+                            </div>
+                            }*@
+                            <div class="table-responsive">
+                                <table class="table table-striped grid1" cellspacing="0" width="100%">
+                                    <thead>
+                                        <tr>
+                                            <th width="10%">UserName</th>
+                                            <th width="10%">From Date</th>
+                                            <th width="10%">To Date</th>
+                                            <th width="10%">Count</th>
+                                            <th width="15%">EmployeeDescription</th>
+                                            @if (roles.Contains("SuperAdmin") || roles.Contains("HR"))
+                                            {
+                                                <th width="15%">HrDescription</th>
+                                            }
+                                            <th width="10%">Is Approve</th>
+                                            <th width="10%">Approve Date</th>
+                                            <th width="10%">FileUpload</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="levtblbdy">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <!-- /.box-body -->
+                    </div>
+                    <!-- /.box -->
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Modal -->
+    <div class="modal fade" id="myModalunpaidpl" role="dialog">
+        <div class="row">
+            <div class="col-md-8">
+                <section class="content">
+                    @Html.AntiForgeryToken()
+                    <!-- Default box -->
+                    <div class="box">
+                        <div class="box-header with-border">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4 class="modal-title">Leaves Details</h4>
+                        </div>
+                        <div><input type="hidden" id=""></div>
+                        <div class="box-body">
+                            @*@if (roles.Contains("SuperAdmin") || roles.Contains("HR"))
+                            {
+                            <div class="form-group">
+                            <select name="Userid" id="leavedrpdwn" class="form-control" asp-items="@ViewBag.UserList"></select>
+                            </div>
+                            }*@
+                            <div class="table-responsive">
+                                <table class="table table-striped grid1" cellspacing="0" width="100%">
+                                    <thead>
+                                        <tr>
+                                            <th width="15%">UserName</th>
+                                            <th width="10%">From Date</th>
+                                            <th width="10%">To Date</th>
+                                            <th width="10%">Count</th>
+                                            <th width="10%">EmployeeDescription</th>
+                                            @if (roles.Contains("SuperAdmin") || roles.Contains("HR"))
+                                            {
+                                                <th width="15%">HrDescription</th>
+                                            }
+                                            <th width="10%">Is Approve</th>
+                                            <th width="10%">Approve Date</th>
+                                            <th width="10%">FileUpload</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="UNlevtblbdy">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <!-- /.box-body -->
+                    </div>
+                    <!-- /.box -->
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <div id="ImptEmployeeModel" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">
+                        Import Employee with Excel
+                        <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </h3>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group row">
+                        <label for="staticEmail" class="col-sm-3 col-form-label">Excel Upload (<span><a href="~/document/ImportExcelSample/EmployeeImport.xlsx" data-toggle="tooltip" title="Download Sample Excel"><i class="fa fa-download"></i></a></span>)</label>
+                        <div class="col-sm-7">
+                            <input type="file" name="imptExcel" id="imptExcel" onChange="validate(this.value)" class="form-control-plaintext" />
+                        </div>
+                        <div class="col-sm-2">
+                            <span><img src="~/images/giphy.gif" id="loader" width="20px" style="display:none;" /></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p> <b>Note </b>: You must upload an excel(.xls,.xlsx) file</p>
+                        </div>
+                        <div class="col-md-6"><button type="button" id="btnUploadExcel" class="btn btn-primary">Upload</button></div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <div id="ImptMonthlyReport" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">
+                        Import Monthly Report Excel
+                        <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </h3>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group row">
+                        <label for="staticEmail" class="col-sm-3 col-form-label">Excel Upload (<span><a href="~/document/ImportExcelSample/mnPerformance_Summary.xls" data-toggle="tooltip" title="Download Sample Excel"><i class="fa fa-download"></i></a></span>)</label>
+                        <div class="col-sm-7">
+                            <input type="file" name="imptMontlyReport" id="imptMontlyReport" onChange="validate(this.value)" class="form-control-plaintext" />
+                        </div>
+                        <div class="col-sm-2">
+                            <span><img src="~/images/giphy.gif" id="img_loader" width="20px" style="display:none;" /></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="row">
+                        <div class="col-md-6"><p> <b>Note </b>: You must upload an excel(.xls,.xlsx) file</p></div>
+                        <div class="col-md-6"><button type="button" id="btnUploadMontlyReport" class="btn btn-primary">Upload</button></div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@*<div class="modal fade" id="addfile" tabindex="-1" role="dialog" aria-labelledby="addCommentsLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addPositionsLabel">File Upload</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+    </div>*@
+
+
+@section Styles{
+    <!-- DataTables -->
+    <link rel="stylesheet" href="~/adminlte/components/datatables.net-bs/css/dataTables.bootstrap.min.css">
+}
+
+
+@section Scripts{
+
+
+    <!-- DataTables -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="~/adminlte/components/datatables.net/js/jquery.dataTables.min.js"></script>
+    <script src="~/adminlte/components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+    <script src="~/js/Employeeleave.js"></script>
+    <script src="~/js/unpaidEmployee.js"></script>
+    <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+    <input type="button" id="btnExport" value="Export" onclick="Export()" />
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.22/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
+
+
+    <!-- page script -->
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            bindEmployeeData(false);
+
+
+            $(document).on("click", "#leavespopup", function () {
+                $('#myModalpl').modal('show');
+            })
+
+            $(document).on("click", "#unpaidleavespopup", function () {
+                $('#myModalunpaidpl').modal('show');
+            })
+
+            $("#save").click(function () {
+
+                var formData = new FormData();
+
+                $(".salary-txt-emp").each(function (index, telement) {
+                    var eleuser = $(telement).data("userid");
+                    var salary = $(telement).val();
+
+                    formData.append("request[" + index + "].userid", eleuser);
+                    formData.append("request[" + index + "].salary", salary.trim().length > 0 ? parseFloat(salary) : 0);
+
+                });
+
+                $.ajax({
+                    type: "POST",
+                    url: "/EmployeeMaster/SaveSalary",
+                    dataType: 'json',
+                    data: formData,
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        console.log(response);
+                        if (response.success == "true") {
+                            toastr.success(response.message);
+                        }
+                        $("#myModal").modal("hide");
+                    },
+                    error: function (response) {
+                        toastr.error(response.message);
+                    }
+                });
+
+            });
+
+            $("#monthlyReport").click(function () {
+                $("#ImptMonthlyReport").modal("show");
+            });
+
+            $("#btnUploadMontlyReport").click(function (e) {
+                e.preventDefault();
+                var fileData = new FormData();
+                $("#img_loader").removeAttr("style");
+                fileData.append("FileUpload", $("#imptMontlyReport")[0].files[0]);
+                $("#btnUploadMontlyReport").attr("disabled", "disabled");
+               
+                if ($("#imptMontlyReport")[0].files[0] != null) {
+                    $.ajax({
+                        type: "POST",
+                        url: "/EmployeeMaster/ImportMonthlyReport",
+                        dataType: 'json',
+                        data: fileData,
+                        cache: false,
+                        processData: false,
+                        contentType: false,
+                        success: function (response) {
+                            console.log(response);
+                            if (response.success == "true") {
+                                toastr.success(response.message);
+                            }
+                            $("#img_loader").attr("style", "display:none");
+                            $("#btnUploadMontlyReport").removeAttr("disabled");
+                            $("#ImptMonthlyReport").modal("hide");
+                        },
+                        error: function (response) {
+                            toastr.error(response.message);
+                            $("#img_loader").attr("style", "display:none");
+                            $("#btnUploadMontlyReport").removeAttr("disabled");
+                        }
+                    });
+                }
+                else {
+                    $("#img_loader").attr("style", "display:none");
+                    toastr.error("Please select excel file.");
+                    $("#btnUploadMontlyReport").removeAttr("disabled");
+                }
+                $("#imptMontlyReport").val(null);
+            });
+
+            $("#employeeImt").click(function () {
+                $("#ImptEmployeeModel").modal("show");
+            });
+
+            $("#btnUploadExcel").on("click", function (e) {
+                e.preventDefault();
+                var fileData = new FormData();
+                fileData.append("FileUpload", $("#imptExcel")[0].files[0]);
+                $("#btnUploadExcel").attr("disabled", "disabled");
+                $("#loader").removeAttr("style");
+
+                if ($("#imptExcel")[0].files[0] != null) {
+                    $.ajax({
+                        type: "POST",
+                        url: "/EmployeeMaster/ImportExcel",
+                        dataType: 'json',
+                        data: fileData,
+                        cache: false,
+                        processData: false,
+                        contentType: false,
+                        success: function (response) {
+                            toastr.success(response.message);
+                            $("#loader").attr("style", "display:none");
+                            $("#btnUploadExcel").removeAttr("disabled");
+                            $("#ImptEmployeeModel").modal("hide");
+
+                            window.location.reload();
+                        },
+                        error: function (xhr, status, error) {
+                            toastr.error(error.message);
+                            $("#loader").attr("style", "display:none");
+                            $("#btnUploadExcel").removeAttr("disabled");
+                        }
+                    });
+                } else {
+                    $("#loader").attr("style", "display:none");
+                    toastr.error("Please select excel file.");
+                    $("#btnUploadExcel").removeAttr("disabled");
+                }
+                $("#imptExcel").val(null);
+            });
+
+            $("#switch").change(function () {
+                $("#grid tbody").empty();
+                var isChecked = $(this).prop('checked');
+                if (isChecked) {
+                    bindEmployeeData(true);
+                } else {
+                    bindEmployeeData(false);
+                }
+            });
+        });
+
+        $("#seedData").click(function () {
+
+            $.ajax({
+                type: "GET",
+                url: "/EmployeeMaster/ManualSeed",
+                dataType: 'json',
+                data: "",
+                cache: false,
+                processData: false,
+                contentType: false,
+                success: function (result) {
+                    debugger;
+                    if (result.success == "true") {
+                        toastr.success(result.message);
+                    }
+                },
+                error: function (response) {
+                    toastr.error(response.message);
+                }
+            });
+
+        });
+
+        function Salary() {
+            $("#amount").val("");
+
+            $.ajax({
+                type: "GET",
+                url: "/EmployeeMaster/SalaryEmployee",
+                data: "Json",
+
+                success: function (response) {
+                    console.log(response);
+
+                    if (response != null) {
+                        var innerHtml = '';
+                        $.each(response, function (i, v) {
+                            var rowdata = response[i]
+                            innerHtml += "<tr>";
+                            innerHtml += "<td id='mail'> " + rowdata.firstName + " " + rowdata.lastName + " </td>";
+                            innerHtml += "<td> <div> <input type='number' data-userid='" + rowdata.id + "' id='amount_" + rowdata.id + "' class='form-control salary-txt-emp'/ > <br/></div>  </td>";
+                            innerHtml += "</tr>";
+
+                        });
+                        $("#notebody").html(innerHtml);
+                        $("#myModal").modal("show");
+                    }
+                }
+
+            });
+        }
+
+        function validate(file) {
+            var ext = file.split(".");
+            ext = ext[ext.length - 1].toLowerCase();
+            var arrayExtensions = ["xlsx", "xls"];
+
+            if (arrayExtensions.lastIndexOf(ext) == -1) {
+                toastr.error("Please upload excel file only.");
+                $("#imptExcel").val("");
+                $("#imptMontlyReport").val("");
+            }
+        }
+
+        function bindEmployeeData(isWhf) {
+            $.get("/EmployeeMaster/EmployeeInfo?isWFH=" + isWhf, function (data) {
+                $("#EmployeeData").html(data);
+                $("#grid").DataTable({
+                    lengthChange: true,
+                    info: true,
+                    searching: true,
+                    dom: 'lrtip',
+                    scrollX: false,
+                    pageLength: 25,
+
+                });
+            });
+
+        }
+
+    </script>
+
+}
+
+
+

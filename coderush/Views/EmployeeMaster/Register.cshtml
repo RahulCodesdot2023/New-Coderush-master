@@ -1,0 +1,284 @@
+﻿@using coderush.ViewModels
+@model Register
+
+@{
+    ViewData["Title"] = "Register";
+}
+
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h1>
+            @ViewData["Title"]
+        </h1>
+        <p>
+            @await Html.PartialAsync(PartialView.StatusMessage, TempData[StaticString.StatusMessage])
+        </p>
+
+    </section>
+    <!-- Main content -->
+    <section class="content">
+        <!-- Default box -->
+        <form asp-controller="EmployeeMaster" asp-action="SubmitRegister" method="post">
+            <div class="box">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Register new member</h3>
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse" data-toggle="tooltip"
+                                title="Collapse">
+                            <i class="fa fa-minus"></i>
+                        </button>
+                        <button type="button" class="btn btn-box-tool" data-widget="remove" data-toggle="tooltip" title="Remove">
+                            <i class="fa fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+
+
+
+
+
+
+                <div class="box-body">
+                    <div class="progress" style="display:none;">
+                        <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+                            0%
+                        </div>
+                    </div>
+                    <div class="nav-tabs-custom">
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a href="#profile-details" data-toggle="tab" onclick="profileclick()" aria-expanded="true">Basic Profile Detail</a></li>
+                            <li class=""><a href="#RegDetails" data-toggle="tab" onclick="regclick()" aria-expanded="false">Registration Details</a></li>
+                            <li class=""><a href="#bankData" data-toggle="tab" onclick="bankclick()" aria-expanded="false">Bank Details</a></li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="active tab-pane" id="profile-details">
+                                <div class="form-group">
+                                    <label asp-for="Email"></label>
+                                    <input asp-for="Email" class="form-control" />
+                                    <span asp-validation-for="Email" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="EmpCode"></label>
+                                    <input asp-for="EmpCode" class="form-control" value="@ViewBag.Code" />
+                                    <span asp-validation-for="EmpCode" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="FirstName"></label>
+                                    <input asp-for="FirstName" class="form-control" />
+                                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="LastName"></label>
+                                    <input asp-for="LastName" class="form-control" />
+                                    <span asp-validation-for="LastName" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="DOB"></label>
+                                    <input type="date" asp-for="DOB" class="form-control" />
+                                    <span asp-validation-for="DOB" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="PhoneNumber"></label>
+                                    <input asp-for="PhoneNumber" class="form-control" />
+                                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                                </div>
+
+                            </div>
+                            <div id="RegDetails" class="tab-pane">
+                                <div class="form-group">
+                                    <label asp-for="EmployeeType"></label>
+                                    <select class="form-control" id="EmployeeType" name="EmployeeType">
+                                        <option value="0">Select Employee Type</option>
+                                        @{
+                                            foreach (var item in @ViewBag.EmployeeType)
+                                            {
+                                                <option value="@item.Id">@item.TextVal</option>
+                                            }
+                                        }
+                                    </select>
+                                    <span asp-validation-for="EmployeeType" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group">
+                                    <label asp-for="Salary"></label>
+                                    <input asp-for="Salary" type="number" class="form-control" />
+                                    <span asp-validation-for="Salary" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="TeamLeader"></label>
+                                    <select class="form-control" asp-items="@ViewBag.TeamLeadRole" asp-for="TeamLeader">
+                                        <option value="">-- Select --</option>
+                                    </select>
+                                    <span asp-validation-for="TeamLeader" class="text-danger"></span>
+                                    <div class="form-group">
+                                        <label asp-for="Password"></label>
+                                        <input asp-for="Password" class="form-control" />
+                                        <span asp-validation-for="Password" class="text-danger"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label asp-for="ConfirmPassword"></label>
+                                        <input asp-for="ConfirmPassword" class="form-control" />
+                                        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="JoiningDate"></label>
+                                    <input type="date" asp-for="JoiningDate" class="form-control" />
+                                    <span asp-validation-for="JoiningDate" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label> Is WFH?</label>
+                                    <input asp-for="isWFH" type="checkbox" class="flat-red" />
+                                </div>
+                                <div class="form-group">
+                                    <label> Active</label>
+                                    <input asp-for="EmailConfirmed" type="checkbox" class="flat-red" />
+                                </div>
+                            </div>
+                            <div id="bankData" class="tab-pane">
+                                <div class="form-group">
+                                    <label asp-for="PanCardNo"></label>
+                                    <input asp-for="PanCardNo" class="form-control" />
+                                    <span asp-validation-for="PanCardNo" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="AadharCardNo"></label>
+                                    <input asp-for="AadharCardNo" class="form-control" />
+                                    <span asp-validation-for="AadharCardNo" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="BankAccNo"></label>
+                                    <input asp-for="BankAccNo" class="form-control" />
+                                    <span asp-validation-for="BankAccNo" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="IFSCode"></label>
+                                    <input asp-for="IFSCode" class="form-control" />
+                                    <span asp-validation-for="IFSCode" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="BankName"></label>
+                                    <input asp-for="BankName" class="form-control" />
+                                    <span asp-validation-for="BankName" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="BankBranchName"></label>
+                                    <input asp-for="BankBranchName" class="form-control" />
+                                    <span asp-validation-for="BankBranchName" class="text-danger"></span>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="box-footer">
+                        <a href="/EmployeeMaster/Index" class="btn btn-lg btn-default" id="btnBack">Back to list</a>
+                        <a href="#profile-details" data-toggle="tab" aria-expanded="false" class="btn btn-lg btn-danger" style="display:none;" id="back">Back</a>
+                        <a href="#Regdetails" data-toggle="tab" aria-expanded="false" class="btn btn-lg btn-danger" style="display:none;" id="back2">Back</a>
+                        <a href="#RegDetails" data-toggle="tab" aria-expanded="false" class="btn btn-lg btn-success" id="next">Next</a>
+                        <a href="#bankData" data-toggle="tab" aria-expanded="false" class="btn btn-lg btn-success" style="display:none;" id="next2">Next</a>
+                        <button type="submit" class="btn btn-lg btn-primary" style="display:none;" id="btnSubmit">Save</button>
+                    </div>
+                </div>
+                <!-- /.box-body -->
+                @*<div class="box-footer">
+                        <a href="/EmployeeMaster/Index" class="btn btn-lg btn-default" id="btnBack">Back to list</a>
+                        <a href="#profile-details" data-toggle="tab" aria-expanded="false" class="btn btn-lg btn-danger" style="display:none;" id="back">Back</a>
+                        <a href="#RegDetails" data-toggle="tab" aria-expanded="false" class="btn btn-lg btn-success" id="next">Next</a>
+                        <button type="submit" class="btn btn-lg btn-primary" style="display:none;" id="btnSubmit">Save</button>
+                    </div>*@
+                <!-- /.box-footer-->
+            </div>
+        </form>
+
+        <!-- /.box -->
+    </section>
+    <!-- /.content -->
+</div>
+<!-- /.content-wrapper -->
+@section Styles{
+
+}
+
+
+
+@section Scripts{
+
+
+    <partial name="_ValidationScriptsPartial" />
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        var currentStep = 1;
+
+        $("#next").click(function () {
+            $("#next").hide();
+            $("#next2").show();
+            $("#back").show();
+            $("#back2").hide();
+            $('a[href="#RegDetails"]').tab('show');
+
+            currentStep++;
+            var progress = (currentStep / 3) * 100;
+            $(".progress-bar").css("width", progress + "%").attr("aria-valuenow", progress).text(progress + "%");
+        });
+
+        $("#next2").click(function () {
+            $("#btnSubmit").show();
+            $("#next2").hide();
+            $("#back2").show();
+            $("#back").hide();
+            $('a[href="#bankData"]').tab('show');
+            currentStep++;
+            var progress = (currentStep / 3) * 100;
+            $(".progress-bar").css("width", progress + "%").attr("aria-valuenow", progress).text(progress + "%");
+        });
+
+        $("#back").click(function () {
+            $("#btnSubmit").hide();
+            $("#back").hide();
+            $("#back2").hide();
+            $("#next2").hide();
+            $("#next").show();
+            $('a[href="#profile-details"]').tab('show');
+        });
+
+        $("#back2").click(function () {
+            $("#btnSubmit").hide();
+            $("#back").show();
+            $("#back2").hide();
+            $("#next").hide();
+            $("#next2").show();
+            $('a[href="#RegDetails"]').tab('show');
+        });
+
+        function profileclick() {
+            $("#btnSubmit").hide();
+            $("#back").hide();
+            $("#back2").hide();
+            $("#next2").hide();
+            $("#next").show();
+            $('a[href="#profile-details"]').tab('show');
+        }
+
+        function regclick() {
+            $("#btnSubmit").hide();
+            $("#back").show();
+            $("#back2").hide();
+            $("#next").hide();
+            $("#next2").show();
+            $('a[href="#RegDetails"]').tab('show');
+        }
+
+        function bankclick() {
+            $("#btnSubmit").show();
+            $("#next2").hide();
+            $("#next").hide();
+            $("#back2").show();
+            $("#back").hide();
+            $('a[href="#bankData"]').tab('show');
+        }
+    </script>
+}
+

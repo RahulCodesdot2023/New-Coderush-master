@@ -1,0 +1,495 @@
+﻿@model CodesDotHRMS.Models.DashBoardViewModel
+@using Microsoft.AspNetCore.Identity
+@using System.Globalization
+@inject UserManager<ApplicationUser> _userManager
+
+@{
+    ViewData["Title"] = "Dashboard";
+
+    var user = await _userManager.GetUserAsync(User);
+    var roles = await _userManager.GetRolesAsync(user);
+
+}
+
+<style>
+    .grey-box {
+        background-color: #ACB1D6;
+        box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    }
+
+    .red-box {
+        background-color: #FFCCCB;
+        box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    }
+
+    .green-box {
+        background-color: #E5F6DF;
+        box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    }
+
+    .blue-box {
+        background-color: #ADD8E6;
+        box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    }
+
+    .table-description {
+        font-size: 1.5rem;
+        width: 200px;
+        /**Major Properties**/
+        overflow: hidden;
+        line-height: 2rem;
+        max-height: 8rem;
+        -webkit-box-orient: vertical;
+        display: block;
+        display: -webkit-box;
+        overflow: hidden !important;
+        text-overflow: ellipsis;
+        -webkit-line-clamp: 4;
+    }
+</style>
+<div class="content-wrapper">
+
+    <section class="content-header">
+        <h1>
+            @ViewData["Title"]
+        </h1>
+        <p>
+            @await Html.PartialAsync(PartialView.StatusMessage, TempData[StaticString.StatusMessage])
+        </p>
+    </section>
+    <!-- Main content -->
+    <div class="row">
+        <div class="col-md-4">
+            <section class="content">
+                <!-- Default box -->
+                <div class="box">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Holiday List</h3>
+                        <div class="box-tools pull-right">
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped grid" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th width="15%">Date</th>
+                                        <th width="15%">Day</th>
+                                        <th width="20%">Name</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.HolidayList)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @item.Date.Value.ToString("dd MMMM yyyy")
+                                            </td>
+                                            <td>
+                                                @item.Day
+                                            </td>
+                                            <td>
+                                                @item.Name
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+                <!-- /.box -->
+            </section>
+        </div>
+
+        <div class="col-md-8">
+            @if (roles.Contains("SuperAdmin") || roles.Contains("HR"))
+            {
+                <input type="hidden" value="@roles.Contains("SuperAdmin").ToString()" id="isSuperAdmin" />
+                <input type="hidden" value="@roles.Contains("HR")" id="isHR" />
+                <section class="content">
+                    @Html.AntiForgeryToken()
+                    <!-- Default box -->
+                    <div class="box">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">List of Leave item</h3>
+                        </div>
+                        <div><input type="hidden" id=""></div>
+                        <div class="box-body">
+                            @*@if (roles.Contains("SuperAdmin") || roles.Contains("HR"))
+                                {
+                                <div class="form-group">
+                                <select name="Userid" id="leavedrpdwn" class="form-control" asp-items="@ViewBag.UserList"></select>
+                                </div>
+                                }*@
+                            <div class="table-responsive">
+                                <table id="grid1" class="table table-striped grid1" cellspacing="0" width="100%">
+                                    <thead>
+                                        <tr>
+                                            <th width="19%">UserName</th>
+                                            <th width="8%">From Date</th>
+                                            <th width="8%">To Date</th>
+                                            <th width="5%">Count</th>
+                                            <th width="14%">EmployeeDescription</th>
+                                            @if (roles.Contains("SuperAdmin") || roles.Contains("HR"))
+                                            {
+                                                <th width="13%">HrDescription</th>
+                                            }
+                                            <th width="8%">Is Approve</th>
+                                            <th width="10%">Approve Date</th>
+
+                                            @*<th width="5%">FileUpload</th>*@
+                                            @*@if (roles.Contains("SuperAdmin") || roles.Contains("HR"))
+                                                {
+                                                <th width="6%">Approve</th>
+                                                }*@
+                                        </tr>
+                                    </thead>
+                                    <tbody id="levtblbdy">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <!-- /.box-body -->
+                    </div>
+                    <!-- /.box -->
+                </section>
+            }
+            else
+            {
+                <section class="content">
+                    @Html.AntiForgeryToken()
+                    <!-- Default box -->
+
+                    <div class="box" style="background-color: #8294C4;">
+                        <div class="box-body">
+                            <div class="container-fluid">
+                                <h2 style="color:#fff;">Leaves Information</h2>
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <div class="panel panel-default grey-box">
+                                            <div class="panel-body">
+                                                <h2 class="text-center">12</h2>
+                                                <h4 class="text-center">Total Paid Leaves</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="panel panel-default red-box">
+                                            <div class="panel-body">
+                                                <h2 class="text-center">@ViewBag.PaidLeave</h2>
+                                                <h4 class="text-center">Paid Leave Taken</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="panel panel-default green-box">
+                                            <div class="panel-body">
+                                                <h2 class="text-center">@(12 - ViewBag.PaidLeave)</h2>
+                                                <h4 class="text-center">Paid Leaves Left</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="panel panel-default blue-box">
+                                            <div class="panel-body">
+                                                <h2 class="text-center">@ViewBag.UnPaidLeave</h2>
+                                                <h4 class="text-center">Unpaid Leaves</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="box" style="background-color:#1B9C85">
+                        <div class="box-header with-border">
+                            <h3 class="box-title fa fa-check">Approved Leaves</h3>
+                            <div class="box-tools pull-right">
+                                <button type="button" class="btn btn-box-tool" data-widget="collapse" data-toggle="tooltip"
+                                        title="Collapse">
+                                    <i class="fa fa-minus"></i>
+                                </button>
+                                <button type="button" class="btn btn-box-tool" data-widget="remove" data-toggle="tooltip" title="Remove">
+                                    <i class="fa fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div><input type="hidden" id=""></div>
+                        <div class="box-body">
+                            <div class="table-responsive">
+                                <table id="leaveApprove" class="table table-striped grid1" cellspacing="0" width="100%">
+                                    <thead>
+                                        <tr>
+                                            <th width="20%">Name</th>
+                                            <th width="20%">From Date</th>
+                                            <th width="20%">To Date</th>
+                                            <th width="20%">Count</th>
+                                            <th width="20%">EmployeeDescription</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="leaveApproveBody">
+                                        @foreach (var item in Model.ApprovedData)
+                                        {
+                                            <tr>
+                                                <td>@item.FullName</td>
+                                                <td>@item.Fromdate</td>
+                                                <td>@item.Todate</td>
+                                                <td>@item.Count</td>
+                                                <td>@item.EmployeeDescription</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <!-- /.box-body -->
+                    </div>
+                    <!-- /.box -->
+                    <!-- Default box -->
+                    <div class="box" style="background-color:#FFCCCB">
+                        <div class="box-header with-border">
+                            <h3 class="box-title fa fa-close">Rejected Leaves</h3>
+                            <div class="box-tools pull-right">
+                                <button type="button" class="btn btn-box-tool" data-widget="collapse" data-toggle="tooltip"
+                                        title="Collapse">
+                                    <i class="fa fa-minus"></i>
+                                </button>
+                                <button type="button" class="btn btn-box-tool" data-widget="remove" data-toggle="tooltip" title="Remove">
+                                    <i class="fa fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div><input type="hidden" id=""></div>
+                        <div class="box-body">
+                            <div class="table-responsive">
+                                <table id="leaveReject" class="table table-striped grid1" cellspacing="0" width="100%">
+                                    <thead>
+                                        <tr>
+                                            <th width="20%">Name</th>
+                                            <th width="20%">From Date</th>
+                                            <th width="20%">To Date</th>
+                                            <th width="20%">Count</th>
+                                            <th width="20%">EmployeeDescription</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="leaveRejectedBody">
+                                        @foreach (var item in Model.RejectedData)
+                                        {
+                                            <tr>
+                                                <td>@item.FullName</td>
+                                                <td>@item.Fromdate</td>
+                                                <td>@item.Todate</td>
+                                                <td>@item.Count</td>
+                                                <td>@item.EmployeeDescription</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <!-- /.box-body -->
+                    </div>
+                    <!-- /.box -->
+                </section>
+            }
+        </div>
+    </div>
+
+    <section class="content">
+        <!-- Default box -->
+        <div class="box">
+            <div class="box-header with-border">
+                <h3 class="box-title">List of Project item</h3>
+                @*<div class="box-tools pull-right">
+                    <a href="/ProjectMaster/Form" class="btn btn-primary"><i class="fa fa-plus"></i></a>
+                    </div>*@
+            </div>
+            <div class="box-body">
+
+                <div class="row">
+
+                    <div class="col-lg-2">
+                        <label>From Date:</label>
+                        <input id="canFromDate" asp-for="@ViewData["sdate"]" type="date" name="sdate" class="form-control" />
+                    </div>
+
+                    <div class="col-lg-2">
+                        <label>TO:</label>
+                        <input id="canTO" type="date" asp-for="@ViewData["edate"]" name="edate" class="form-control" />
+
+                    </div>
+                    <div class="col-lg-2">
+                        <select id="dropdown" class="form-control" asp-for=" @ViewData["lastmonth"]" name="lastmont" style="margin-top:25px">
+                            <option value="0"> --Select-- </option>
+                            <option value="1"> Last Month </option>
+                            <option value="2"> Current Month </option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label> Technologies :</label>
+                        <select class="form-control" style="" name="technology" id="btnddl" asp-for="@ViewData["selectedtech"]" asp-items="@ViewBag.projecttechnologiList">
+                            <option value="0">-- ALL --</option>
+                        </select>
+                    </div>
+                    <div class="col-lg-3">
+                        @*<a href="/ProjectMaster/ProjectIndex" class="btn btn-primary" style="margin-top: 25px" id="btnSearch">Search</a>*@
+                        <button class="btn btn-primary" style="margin-top: 25px" id="btnSearch">Search</button>
+                        <button id="clear" style="margin-top: 25px" class="btn btn-primary">Clear</button>
+                    </div>
+                    @*<a href="/CandidateMaster/CandidateIndex?lastmont=1" class="btn btn-primary" style="margin-top: 25px" id="btnLastMonth">Last Month</a>
+                        <a href="/CandidateMaster/CandidateIndex?curentmonth=2" class="btn btn-primary" style="margin-top: 25px" id="btnCurrentMonth">Current Month</a>*@
+
+                </div>
+                <br />
+                <br />
+
+                <div class="table-responsive">
+                    <table id="grid3" class="table table-striped" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th>Sr No.</th>
+                                @*<th width="5%">Action</th>*@
+                                <th width="20%">Project Name</th>
+                                <th width="10%">Technologies</th>
+                                <th width="10%">StartDate</th>
+                                <th width="10%">Manager Name</th>
+                                <th width="10%">Developer Name</th>
+                                <th width="10%">payment type</th>
+                                <th width="10%">project amount</th>
+                                <th width="10%">Status</th>
+                                <th width="10%">Description</th>
+                                <th width="10%">Created By / Date</th>
+                                <th width="10%">Update By / Date</th>
+                                <th width="10%">Bank Details</th>
+                                <th width="10%">Penalty</th>
+                                <th width="10%">Achievement</th>
+                                <th width="10%">Active</th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.projectMaster)
+                            {
+                                <tr>
+                                    <td>
+                                        @item.Id
+                                    </td>
+                                    @*<td>
+                                        <a href="/ProjectMaster/Form/@item.Id"><i class="fa fa-edit"></i></a>
+                                        &nbsp;&nbsp;&nbsp;
+                                        @if (roles.Contains("SuperAdmin"))
+                                        {
+                                        <a href="/ProjectMaster/Delete/@item.Id"><i class="fa fa-trash"></i></a>
+                                        }
+                                        </td>*@
+                                    <td>
+                                        @item.projectname
+                                    </td>
+                                    <td>
+                                        @item.TechnologyName
+                                    </td>
+                                    <td>
+                                        @(item.StartedDate.HasValue ? item.StartedDate.Value.ToString("dd MMMM yyyy") : "")
+                                    </td>
+                                    <td>
+                                        @item.managername
+                                    </td>
+                                    <td>
+                                        @item.developername
+                                    </td>
+                                    <td>
+                                        @item.paymenttype
+                                    </td>
+                                    <td>
+                                        @item.projectamount
+                                        &nbsp;&nbsp; &nbsp;
+                                        @item.CurrencyName
+                                    </td>
+                                    <td>
+                                        @item.ProjectStatus
+                                    </td>
+                                    @*<td><span style="text-decoration-line:@(item.Isactive ? "line-through" : "none")">@item.Isactive</span></td>*@
+                                    <td>
+                                        <p class="tooltips shortspan" data-placement="top" title="@item.description"> @item.description </p>
+                                    </td>
+                                    <td>
+                                        @item.createdby
+                                        &nbsp;&nbsp;&nbsp;
+                                        @*@item.createddate.Value.ToString("dd MMMM yyyy")*@
+                                        @(item.createddate.HasValue ? item.createddate.Value.ToString("dd MMMM yyyy") : "")
+                                    </td>
+                                    <td>
+                                        @item.updatedby
+                                        &nbsp;&nbsp;&nbsp;
+                                        @(item.updateddate.HasValue ? item.updateddate.Value.ToString("dd MMMM yyyy") : "")
+                                    </td>
+                                    <td>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-primary" type="button">@item.PenaltyCount</button>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-primary" type="button">@item.AchievementCount</button>
+                                    </td>
+                                    <td>
+                                        <input type="checkbox" class="flat-red" @(item.isactive ? "checked" : "") onclick="return false;">
+                                    </td>
+                                    @*<td>
+                                        <a href="#"><i id="myModal" onclick="ViewDetails(@item.Id)" &nbsp; class="fa fa-comments-o"></i></a>
+                                        </td>
+                                        <td>
+                                        <a href="#"><i id="myModalView" onclick="InvoiceForm(@item.Id)" &nbsp; class="fa fa-plus"></i></a>
+                                        </td>
+                                        <td>
+                                        <a href="#"><i id="modalProjectH" onclick="ProjectHistoryLink(@item.Id)" &nbsp; class="fa fa-user-plus"></i></a>
+                                        </td>*@
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+
+
+
+            </div>
+        </div>
+    </section>
+    <!-- /.content -->
+    <!-- /.content -->
+    <!-- /.content -->
+</div>
+
+<!-- /.content-wrapper -->
+@section Styles{
+    <!-- DataTables -->
+    <link rel="stylesheet" href="~/adminlte/components/datatables.net-bs/css/dataTables.bootstrap.min.css">
+}
+@section Scripts{
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="~/adminlte/components/datatables.net/js/jquery.dataTables.min.js"></script>
+    <script src="~/adminlte/components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+    <script src="~/js/Dashboard.js"></script>
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            $('#grid3').DataTable({
+                lengthChange: false,
+                info: false,
+                searching: true,
+                dom: 'lrtip',
+                scrollX: false,
+                pageLength: 25,
+            });
+
+        });
+
+    </script>
+}

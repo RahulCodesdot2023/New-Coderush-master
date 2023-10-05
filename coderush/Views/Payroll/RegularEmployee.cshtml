@@ -1,0 +1,132 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using coderush.Data
+@model List<coderush.Models.ApplicationUser>
+
+@inject UserManager<ApplicationUser> _userManager
+@inject ApplicationDbContext _context
+
+@{
+    ViewData["Title"] = "Actived Employee List";
+    var user = await _userManager.GetUserAsync(User);
+    var roles = await _userManager.GetRolesAsync(user);
+    var alluser = _context.ApplicationUser.ToList();
+}
+
+@{
+    Layout = null;
+}
+<div class="box">
+    <div class="box-header with-border">
+<div class="box-title pull-right">
+    Working Days : <label>@ViewBag.WorkingDayCounter</label>
+</div>
+</div>
+</div>
+<table id="grid" class="table table-striped" cellspacing="0" width="100%">
+    <thead>
+        <tr>
+            <th width="10%">First Name</th>
+            <th width="10%">Last Name</th>
+            <th width="20%">Member Email</th>
+            <th width="10%">Paid Leave</th>
+            <th width="10%">Unpaid Leave</th>
+            <th width="10%">Salary</th>
+            <th width="10%">Monthly Salary</th>
+            <th width="10%">Total Working Hours</th>
+            <th width="10%">Total Attended Hours</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            foreach (var item in Model)
+            {
+                var basic = Convert.ToDecimal(item.Salary) / Convert.ToInt32(ViewBag.WorkingDayCounter);
+                var working = ViewBag.WorkingDayCounter;
+                var monthlySalary = basic * working;
+                decimal monthlyWorkingHours = ViewBag.WorkingDayCounter * 8;
+                var monthlyLeaves = ViewBag.MonthlyLeaves;
+                if (monthlyLeaves > 0)
+                {
+                    item.PaidLeave = item.PaidLeave + monthlyLeaves;
+                }
+                decimal hoursAttended = 0;
+                var totalAttendHours = _context.MonthlyTotalHours.FirstOrDefault(x => x.EmployeeCode == item.EmpCode)?.TotalHours.ToString() ?? "";
+                if (totalAttendHours == "")
+                    hoursAttended = 0;
+                else
+                    hoursAttended = decimal.Parse(totalAttendHours);
+                if (item.PaidLeave > 0)
+                {
+                    hoursAttended = hoursAttended + (8 * item.PaidLeave);
+                }
+
+                if (hoursAttended > monthlyWorkingHours)
+                {
+                    hoursAttended = monthlyWorkingHours;
+                }
+
+                if (item.UnpaidLeave > 0)
+                {
+                    var unpaidhours = monthlyWorkingHours - (8 * item.UnpaidLeave);
+                    if (unpaidhours < hoursAttended)
+                    {
+                        hoursAttended = unpaidhours;
+                    }
+                }
+
+                decimal differenceHours = hoursAttended - monthlyWorkingHours;
+                if (differenceHours < (-2))
+                {
+                    differenceHours = Math.Abs(differenceHours);
+                    if (differenceHours > 8)
+                    {
+                        while (differenceHours >= 8)
+                        {
+                            differenceHours -= 8;
+                            monthlySalary = monthlySalary - basic;
+                        }
+                        if (differenceHours < 8)
+                        {
+                            if (differenceHours >= 6 && differenceHours <= 8)
+                            {
+                                monthlySalary = monthlySalary - basic;
+                            }
+                            else if (differenceHours > 0 && differenceHours <= 5)
+                            {
+                                monthlySalary = monthlySalary - (basic / 2);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (differenceHours >= 6 && differenceHours <= 8)
+                        {
+                            monthlySalary = monthlySalary - basic;
+                        }
+                        else if (differenceHours <= 5)
+                        {
+                            monthlySalary = monthlySalary - basic / 2;
+                        }
+                    }
+                }
+                <tr>
+                    <td>@item.FirstName</td>
+                    <td>@item.LastName</td>
+                    <td>@item.Email</td>
+                    <td>@item.PaidLeave</td>
+                    <td>@item.UnpaidLeave</td>
+                    <td>@item.Salary</td>
+                    <td>
+                        @Math.Round(monthlySalary,MidpointRounding.ToEven)
+                    </td>
+                    <td>
+                        @Math.Round(monthlyWorkingHours,MidpointRounding.ToEven)
+                    </td>
+                    <td>
+                        @Math.Round(hoursAttended,MidpointRounding.ToEven)
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>

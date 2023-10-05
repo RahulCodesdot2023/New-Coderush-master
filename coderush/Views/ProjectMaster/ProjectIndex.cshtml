@@ -1,0 +1,158 @@
+﻿@using coderush.Data
+@using Microsoft.AspNetCore.Identity
+@model List<ProjectMaster>
+
+@inject UserManager<ApplicationUser> _userManager
+@inject ApplicationDbContext _context
+@{
+    ViewData["Title"] = "Projects";
+}
+
+<style>
+    .shortspan {
+        display: inline-block;
+        width: 50px;
+        white-space: nowrap;
+        overflow: hidden !important;
+        text-overflow: ellipsis;
+    }
+</style>
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h1>
+            @ViewData["Title"]
+        </h1>
+        <p>
+            @await Html.PartialAsync(PartialView.StatusMessage, TempData[StaticString.StatusMessage])
+        </p>
+
+    </section>
+    <!-- Main content -->
+    <section class="content">
+        <!-- Default box -->
+        <div class="box">
+            <div class="box-header with-border">
+                <h3 class="box-title">List of Project item</h3>
+                <div class="box-tools pull-right">
+                    <a href="/ProjectMaster/Form" class="btn btn-primary"><i class="fa fa-plus"></i></a>
+                </div>
+            </div>
+            <div class="box-body">
+                <div class="table-responsive">
+                    <table id="grid" class="table table-striped" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th>Sr No.</th>
+                                <th>ProjectName</th>
+                                <th>Technologies</th>
+                                <th>Description</th>
+                                <th>ManagerName</th>
+                                <th>DeveloperName</th>
+                                <th>paymenttype</th>
+                                <th>projectamount</th>
+                                <th>currency</th>
+                                <th>Is Active</th>
+                                <th width="5%">Edit</th>
+                                <th width="5%">Delete</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                var superAdmin = _userManager.GetUsersInRoleAsync("SuperAdmin").Result.FirstOrDefault();
+                                var manager = _context.ApplicationUser.Where(x => x.Id == item.ManagerName).FirstOrDefault();
+                                if (manager == null)
+                                    manager = superAdmin;
+                                var managerName = (manager.FirstName != null || manager.LastName != null) ? manager.FirstName + " " + manager.LastName : "";
+                                var developer = _context.ApplicationUser.Where(x => x.Id == item.DeveloperName).FirstOrDefault();
+                                if (developer == null)
+                                    developer = superAdmin;
+                                var developerName = developer.FirstName != null ? developer.FirstName : "" + " " + developer.LastName != null ? developer.LastName : "";
+                                <tr>
+                                    <td>
+                                        @item.Id
+                                    </td>
+
+                                    <td>
+                                        @item.ProjectName
+                                    </td>
+                                    <td>
+                                        @item.Technologies
+                                    </td>
+                                    <td>
+                                        <p class="tooltips shortspan" data-placement="bottom" title="@item.Description"> @item.Description</p>
+                                    </td>
+                                    <td>
+                                        @managerName
+                                    </td>
+                                    <td>
+                                        @developerName
+                                    </td>
+                                    <td>
+                                        @item.paymenttype
+                                    </td>
+                                    <td>
+                                        @item.projectamount
+                                    </td>
+                                    <td>
+                                        @item.currency
+                                    </td>
+                                    <td>
+                                        <input type="checkbox" class="flat-red" @(item.isactive ? "checked" : "") onclick="return false;">
+                                    </td>
+                                    <td>
+                                        <a href="/ProjectMaster/Form/@item.Id"><i class="fa fa-edit"></i></a>
+                                    </td>
+                                    <td>
+                                        <a href="/ProjectMaster/Delete/@item.Id"><i class="fa fa-trash"></i></a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+            <!-- /.box-body -->
+        </div>
+
+        <!-- /.box -->
+    </section>
+    <!-- /.content -->
+</div>
+<!-- /.content-wrapper -->
+@section Styles{
+    <!-- DataTables -->
+    <link rel="stylesheet" href="~/adminlte/components/datatables.net-bs/css/dataTables.bootstrap.min.css">
+}
+
+
+    @section Scripts{
+
+
+    <!-- DataTables -->
+    <script src="~/adminlte/components/datatables.net/js/jquery.dataTables.min.js"></script>
+    <script src="~/adminlte/components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+
+    <!-- page script -->
+    <script type="text/javascript">
+        $(document).ready(function () {
+            //gridSorting();
+            $('#grid').DataTable({
+                lengthChange: false,
+                info: false,
+                searching: true,
+                dom: 'lrtip',
+                scrollX: true,
+                pageLength: 15,
+            });
+
+            $(".tooltips").tooltip();
+            $(".tooltips").css("max-width", "100% !important");
+        });
+
+    </script>
+
+}

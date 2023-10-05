@@ -1,0 +1,385 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Profile";
+}
+
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h1>
+            @ViewData["Title"]
+        </h1>
+        <p>
+            <partial name="_StatusMessage" for="StatusMessage" />
+        </p>
+
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="row">
+            <!-- Default box -->
+
+            <div class="col-md-3">
+                <div class="box box-primary">
+                    <div class="box-body box-profile">
+                        @if (Model.Input.ProfilePic != null)
+                        {
+                            <img id="mainProfilepic" class="profile-user-img img-responsive img-circle" src="data:image/*;base64,@(Convert.ToBase64String(Model.Input.ProfilePic))" style="width:150px;height:150px; object-fit:cover" />
+                        }
+                        else
+                        {
+                            <img id="mainProfilepic" class="profile-user-img img-responsive img-circle" src="~/images/no-profile.jpg" style="width:150px;height:150px; object-fit:cover" />
+                        }
+
+
+                        <h2 class="profile-username text-center">@Model.Input.FirstName @Model.Input.lastName</h2>
+
+                        <ul class="list-group list-group-unbordered">
+                            <li class="list-group-item">
+                                <b>User Name</b> <a class="pull-right">@Model.Username</a>
+                            </li>
+                            <li class="list-group-item">
+                                <b>Email</b> <a class="pull-right">@Model.Input.Email</a>
+                            </li>
+                            <li class="list-group-item">
+                                <b>Date of Birth</b> <a class="pull-right">@Model.Input.DOB</a>
+                            </li>
+                            <li class="list-group-item">
+                                <b>Phone Number</b> <a class="pull-right">@Model.Input.PhoneNumber</a>
+                            </li>
+                            <li class="list-group-item">
+                                <b>Date Of Joining</b> <a class="pull-right">@Model.Input.DOJ</a>
+                            </li>
+                        </ul>
+                        <button id="edit-profile-button" type="submit" class="btn btn-primary btn-block"><b>Edit</b></button>
+                        <button id="enable-profile-button" type="submit" class="btn btn-primary btn-block" style="display:none;"><b>Enable</b></button>
+                    </div>
+
+                </div>
+            </div>
+
+
+            <div class="col-md-9">
+                <div class="nav-tabs-custom">
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a href="#profile-details" data-toggle="tab" aria-expanded="true">Profile Detail</a></li>
+                        <li class=""><a href="#document" data-toggle="tab" aria-expanded="false">Document</a></li>
+                        <li class=""><a href="#bankData" data-toggle="tab" aria-expanded="false">Bank Details</a></li>
+                    </ul>
+                    <form id="profile-form" method="post" enctype="multipart/form-data">
+                        <div class="tab-content">
+                            <div class="active tab-pane" id="profile-details">
+                                <div class="box-body">
+
+                                    <div class="form-group">
+                                        <label asp-for="Input.FirstName"></label>
+                                        <input asp-for="Input.FirstName" class="form-control accField" disabled="disabled" />
+                                        <span asp-validation-for="Input.FirstName" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label asp-for="Input.lastName"></label>
+                                        <input asp-for="Input.lastName" class="form-control accField" disabled="disabled" />
+                                        <span asp-validation-for="Input.lastName" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label asp-for="Username"></label>
+                                        <input asp-for="Username" class="form-control accField" disabled="disabled" />
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label asp-for="Input.Email"></label>
+                                        @if (Model.IsEmailConfirmed)
+                                        {
+                                            <div class="input-group">
+                                                <input asp-for="Input.Email" class="form-control accField" disabled="disabled" />
+                                                <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-ok text-success"></span></span>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <input asp-for="Input.Email" class="form-control accField" disabled="disabled" />
+                                            <button id="email-verification" type="submit" asp-page-handler="SendVerificationEmail" class="btn btn-link">Send verification email</button>
+                                        }
+                                        <span asp-validation-for="Input.Email" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label asp-for="Input.PhoneNumber"></label>
+                                        <input asp-for="Input.PhoneNumber" onkeypress="return isNumberKey(event)" maxlength="10" class="form-control accField" disabled="disabled" />
+                                        <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label asp-for="Input.DOB"></label>
+                                        <input asp-for="Input.DOB" type="date" class="form-control accField" disabled="disabled" />
+                                        <span asp-validation-for="Input.DOB" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label asp-for="Input.DOJ"></label>
+                                        <input asp-for="Input.DOJ" type="date" class="form-control accField" disabled="disabled" />
+                                        <span asp-validation-for="Input.DOJ" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="document" class="tab-pane">
+                                <div class="box-body">
+
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="box box-solid">
+                                                <!-- /.box-header -->
+                                                <div class="box-body">
+                                                    @if (Model.Input.ProfilePic != null)
+                                                    {
+                                                        <img id="profilepic" style="width:250px;height:250px; object-fit:cover" src="data:image/*;base64,@(Convert.ToBase64String(Model.Input.ProfilePic))" class="profile-user-img img-responsive">
+                                                    }
+                                                    else
+                                                    {
+                                                        <img id="profilepic" src="~/images/no-profile.jpg" style="width:150px;height:150px; object-fit:cover" class="profile-user-img img-responsive" />
+                                                        <span class="text-danger">No Profile Picture Uploaded Until Now.</span>
+                                                    }
+
+                                                </div>
+                                                <!-- /.box-body -->
+                                                <div class="box-footer with-border">
+                                                    <input type="file"
+                                                           accept=".png,.jpg,.jpeg,.gif,.tif"
+                                                           asp-for="Input.ProfilePic"
+                                                           class="form-control accField"
+                                                           style="border:0px!important;padding: 0px;padding-top: 10px;padding-bottom: 30px;"
+                                                           onchange="document.getElementById('profilepic').src = window.URL.createObjectURL(this.files[0])"
+                                                           disabled="disabled" />
+                                                </div>
+                                            </div>
+                                            <!-- /.box -->
+                                        </div>
+                                        <!-- ./col -->
+
+                                        <div class="col-md-4">
+                                            <div class="box box-solid">
+                                                <!-- /.box-header -->
+                                                <div class="box-body">
+                                                    @if (Model.Input.AadharFront != null)
+                                                    {
+                                                        <img id="aadharfront" style="width:250px;height:250px; object-fit:cover" src="data:image/*;base64,@(Convert.ToBase64String(Model.Input.AadharFront))" class="profile-user-img img-responsive">
+                                                    }
+                                                    else
+                                                    {
+                                                        <img id="aadharfront" src="~/images/aadhar-front-dummy.png" style="width:150px;height:150px; object-fit:cover" class="profile-user-img img-responsive" />
+                                                        <div class="text-danger">No Aadhar Card Front Photo Uploaded Until Now.</div>
+                                                    }
+                                                </div>
+                                                <!-- /.box-body -->
+                                                <div class="box-footer">
+                                                    <div class="form-group">
+                                                        <label asp-for="Input.AadharCardNo"></label>
+                                                        <input asp-for="Input.AadharCardNo" class="form-control accField" disabled="disabled" />
+                                                        <span asp-validation-for="Input.AadharCardNo" class="text-danger"></span>
+                                                    </div>
+                                                    <input type="file"
+                                                           accept=".png,.jpg,.jpeg,.gif,.tif"
+                                                           asp-for="Input.AadharFront"
+                                                           class="form-control accField"
+                                                           style="border:0px!important;padding: 0px;padding-top: 10px;padding-bottom: 30px;"
+                                                           onchange="document.getElementById('aadharfront').src = window.URL.createObjectURL(this.files[0])"
+                                                           disabled="disabled" />
+                                                </div>
+                                            </div>
+                                            <!-- /.box -->
+
+                                        </div>
+                                        <!-- ./col -->
+
+                                        <div class="col-md-4">
+                                            <div class="box box-solid">
+                                                <!-- /.box-header -->
+                                                <div class="box-body">
+                                                    @if (Model.Input.AadharBack != null)
+                                                    {
+                                                        <img id="aadharback" style="width:250px;height:250px; object-fit:cover" src="data:image/*;base64,@(Convert.ToBase64String(Model.Input.AadharBack))" class="profile-user-img img-responsive">
+                                                    }
+                                                    else
+                                                    {
+                                                        <img id="aadharback" src="~/images/aadhar-back-dummy.jpg" style="width:150px;height:150px; object-fit:cover" class="profile-user-img img-responsive" />
+                                                        <div class="text-danger">No Aadhar Card Back Photo Uploaded Until Now.</div>
+                                                    }
+                                                </div>
+                                                <!-- /.box-body -->
+                                                <div class="box-footer">
+                                                    <input type="file"
+                                                           accept=".png,.jpg,.jpeg,.gif,.tif"
+                                                           asp-for="Input.AadharBack"
+                                                           class="form-control accField"
+                                                           style="border:0px!important;padding: 0px;padding-top: 10px;padding-bottom: 30px;"
+                                                           onchange="document.getElementById('aadharback').src = window.URL.createObjectURL(this.files[0])"
+                                                           disabled="disabled" />
+                                                </div>
+                                            </div>
+                                            <!-- /.box -->
+                                        </div>
+                                        <!-- ./col -->
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="box box-solid">
+                                                <div class="box-body">
+                                                    @if (Model.Input.PanCard != null)
+                                                    {
+                                                        <img id="pancard" style="width:250px;height:250px; object-fit:cover" src="data:image/*;base64,@(Convert.ToBase64String(Model.Input.PanCard))" class="profile-user-img img-responsive">
+                                                    }
+                                                    else
+                                                    {
+                                                        <img id="pancard" src="~/images/pan-card-front-dummy.png" style="width:150px;height:150px; object-fit:cover" class="profile-user-img img-responsive" /><br />
+                                                        <div class="text-danger">No Pan Card Photo Uploaded Until Now.</div>
+                                                    }
+                                                </div>
+                                                <div class="box-footer">
+                                                    <div class="form-group">
+                                                        <label asp-for="Input.PanCardNo"></label>
+                                                        <input asp-for="Input.PanCardNo" class="form-control accField" disabled="disabled" />
+                                                        <span asp-validation-for="Input.PanCardNo" class="text-danger"></span>
+                                                    </div>
+                                                    <input type="file"
+                                                           accept=".png,.jpg,.jpeg,.gif,.tif"
+                                                           asp-for="Input.PanCard"
+                                                           class="form-control accField"
+                                                           style="border:0px!important;padding: 0px;padding-top: 10px;padding-bottom: 30px;"
+                                                           onchange="document.getElementById('pancard').src = window.URL.createObjectURL(this.files[0])"
+                                                           disabled="disabled" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="bankData" class="tab-pane">
+                                <div class="box-body">
+                                    <div class="form-group">
+                                        <label asp-for="Input.AccountNumber"></label>
+                                        <input asp-for="Input.AccountNumber" class="form-control accField" disabled="disabled" />
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label asp-for="Input.IFSCode"></label>
+                                        <input asp-for="Input.IFSCode" class="form-control accField" disabled="disabled" />
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label asp-for="Input.BankName"></label>
+                                        <input asp-for="Input.BankName" class="form-control accField" disabled="disabled" />
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label asp-for="Input.BankBranchName"></label>
+                                        <input asp-for="Input.BankBranchName" class="form-control accField" disabled="disabled" />
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="box-footer">
+                            <div class="text-center">
+                                <button id="update-profile-button" type="submit" class="w-100 btn btn-lg btn-primary accField" disabled="disabled">Save</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- /.box -->
+</div>
+
+<!-- /.content -->
+<!-- /.content-wrapper -->
+
+
+@section Styles{
+    <!-- Bootstrap 3.3.7 -->
+    <link rel="stylesheet" href="~/adminlte/components/bootstrap/dist/css/bootstrap.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="~/adminlte/components/font-awesome/css/font-awesome.min.css">
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="~/adminlte/components/Ionicons/css/ionicons.min.css">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="~/adminlte/dist/css/AdminLTE.min.css">
+    <!-- AdminLTE Skins. Choose a skin from the css/skins
+         folder instead of downloading all of them to reduce the load. -->
+    <link rel="stylesheet" href="~/adminlte/dist/css/skins/_all-skins.min.css">
+    <!-- Pace style -->
+    <link rel="stylesheet" href="~/adminlte/plugins/pace/pace.min.css">
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <!-- Google Font -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
+}
+
+
+@section Scripts{
+    <!-- jQuery 3 -->
+    <script src="~/adminlte/components/jquery/dist/jquery.min.js"></script>
+    <!-- Bootstrap 3.3.7 -->
+    <script src="~/adminlte/components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <!-- PACE -->
+    <script src="~/adminlte/components/PACE/pace.min.js"></script>
+    <!-- Slimscroll -->
+    <script src="~/adminlte/components/jquery-slimscroll/jquery.slimscroll.min.js"></script>
+    <!-- FastClick -->
+    <script src="~/adminlte/components/fastclick/lib/fastclick.js"></script>
+    <!-- AdminLTE App -->
+    <script src="~/adminlte/dist/js/adminlte.min.js"></script>
+    <!-- AdminLTE for demo purposes -->
+    <script src="~/adminlte/dist/js/demo.js"></script>
+    <!-- page script -->
+    <script type="text/javascript">
+        // To make Pace works on Ajax calls
+        $(document).ajaxStart(function () {
+            Pace.restart()
+        })
+        $('.ajax').click(function () {
+            $.ajax({
+                url: '#', success: function (result) {
+                    $('.ajax-content').html('<hr>Ajax Request Completed !')
+                }
+            })
+        })
+
+        function isNumberKey(evt) {
+            var charCode = (evt.which) ? evt.which : evt.keyCode;
+            if (charCode != 46 && charCode > 31
+                && (charCode < 48 || charCode > 57))
+                return false;
+            return true;
+        }
+
+        $(document).ready(function () {
+            $("#edit-profile-button").click(function () {
+                $(".accField").removeAttr("disabled", "disabled");
+                $("#edit-profile-button").hide();
+                $("#enable-profile-button").show();
+            });
+
+            $("#enable-profile-button").click(function () {
+                $(".accField").attr("disabled", "disabled");
+                $("#edit-profile-button").show();
+                $("#enable-profile-button").hide();
+            });
+        });
+    </script>
+
+    <partial name="_ValidationScriptsPartial" />
+}

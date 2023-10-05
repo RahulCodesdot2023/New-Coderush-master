@@ -1,0 +1,887 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using CodesDotHRMS.Models
+@model CodesDotHRMS.Models.TimeSheet;
+@inject UserManager<ApplicationUser> _userManager
+@{
+    ViewData["Title"] = "TimeSheet Management";
+    var user = await _userManager.GetUserAsync(User);
+    var roles = await _userManager.GetRolesAsync(user);
+}
+
+<style>
+    .shortspan {
+        display: inline-block;
+        width: 50px;
+        white-space: nowrap;
+        overflow: hidden !important;
+        text-overflow: ellipsis;
+    }
+
+
+    .tooltip-inner {
+        max-width: 500px;
+        display: inline-block;
+        word-break: break-all;
+        overflow-wrap: break-word;
+    }
+</style>
+
+@*<script src="jquery-3.5.1.min.js"></script>*@
+
+
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h1>
+            @ViewData["Title"]
+        </h1>
+        <p>
+            @await Html.PartialAsync(PartialView.StatusMessage, TempData[StaticString.StatusMessage])
+        </p>
+
+    </section>
+    <!-- Main content -->
+    <section class="content">
+        <div class="box">
+            <div class="box-header with-border">
+            </div>
+
+            <div class="container">
+
+                <!-- Modal -->
+                <div class="modal fade" id="myModal" role="dialog">
+                    <div class="modal-dialog">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Default box -->
+            <div class="nav-tabs-custom">
+                <div class="box-header with-border">
+                    @if (roles.Contains("SuperAdmin") || roles.Contains("HR") || roles.Contains("TeamAdmin"))
+                    {
+                        <input type="hidden" id="IsAdmin" value="true" />
+                    }
+                    else
+                    {
+                        <input type="hidden" id="IsAdmin" value="false" />
+                    }
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a href="#manualTime" data-toggle="tab" aria-expanded="true">Manual Time</a></li>
+                        @if (ViewBag.IsWFHResult == true || roles.Contains("SuperAdmin") || roles.Contains("HR") || roles.Contains("TeamAdmin"))
+                        {
+                            <li class=""><a href="#WFH" data-toggle="tab" aria-expanded="false">Work from home</a></li>
+                        }
+                    </ul>
+
+                </div>
+                <div class="box-body">
+                    <div class="tab-content">
+                        <div class="table-responsive active tab-pane" id="manualTime">
+                            <div class="box-tools">
+                                <div class="form-group row">
+
+                                    <div class="col-sm-2 pull-center">
+                                        <button class="btn btn-primary" onclick="openpopup2()"><i class="fa fa-plus"></i> &nbsp;&nbsp; Add time</button>
+                                    </div>
+                                    @if (roles.Contains("SuperAdmin") || roles.Contains("HR") || roles.Contains("TeamAdmin"))
+                                    {
+                                        <div class="pull-right">
+                                            <div class="col-sm-6">
+
+                                                <select id="selectStatus" class="form-control col-sm-3" style="display: flex;gap:20px;">
+                                                    <option value="Select">Select Status</option>
+                                                    <option value="1">Accept</option>
+                                                    <option value="0">Reject</option>
+                                                </select>
+                                                <span id="errSelectStatus" style="display:none;">Please select  status.</span>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <button class="btn btn-primary col-sm" id="btnChangeStatus">&nbsp; Change</button>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                            <table id="grid2" class="table" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        @if (roles.Contains("SuperAdmin") || roles.Contains("HR") || roles.Contains("TeamAdmin"))
+                                        {
+                                            <th><input type="checkbox" class="checkAll" /></th>
+                                        }
+                                        <th>EmployeeName</th>
+                                        <th>Date</th>
+                                        <th>From Time</th>
+                                        <th>To Time</th>
+                                        <th>Description</th>
+                                        <th>IsApproved?</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="mantblbdy">
+                                </tbody>
+
+                            </table>
+                        </div>
+                        <div class="table-responsive tab-pane" id="WFH">
+                            <div class="box-tools pull-right">
+                                <button class="btn btn-primary" onclick="openpopup()"><i class="fa fa-plus"></i> &nbsp;&nbsp; Add TimeSheet</button>
+                            </div>
+                            <table id="grid" class="table table-striped" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>EmployeeName</th>
+                                        <th>From Date</th>
+                                        <th>To Date</th>
+                                        <th>Description</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="levtblbdy">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /.box-body -->
+        </div>
+
+        <!-- /.box -->
+    </section>
+    <!-- /.content -->
+</div>
+
+<div class="modal fade" id="addTimeSheet" tabindex="-1" role="dialog" aria-labelledby="addTimeSheetLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="addTimeSheetLabel">Create TimeSheet</h3>
+                <h3 class="modal-title" id="updateTimeSheetLabel">Update TimeSheet</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="btnholidaypopupclose">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="box-body">
+                    <div class="form-group col-md-12">
+                        <label>Name</label>
+                        @*<input type="text" id="txtname" class="form-control" />
+                        <span id="errName" class="text-danger">Please enter name</span>*@
+                        <input type="hidden" asp-for="Id" />
+                        @if (roles.Contains("SuperAdmin") || roles.Contains("HR"))
+                        {
+                            <div class="form-group">
+                                <select name="Userid" id="txtname" class="form-control" asp-items="@ViewBag.UserList"></select>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="form-group">
+                                <input id="txtname" value="@ViewBag.EmployeeId" type="hidden" />
+                                <input id="txtEmployee" value="@ViewBag.EmployeeName" class="form-control" readonly />
+                                <input type="hidden" asp-for="Id" value="@user.Id" />
+                            </div>
+                        }
+                    </div>
+                    <div class="form-group col-md-12">
+                        <label>From Date</label>
+                        <input type="date" id="fromdate" class="form-control" />
+                        <span id="errfromDate" class="text-danger">Please select From date</span>
+                    </div>
+                    <div class="form-group col-md-12">
+                        <label>To Date</label>
+                        <input type="date" id="todate" class="form-control" />
+                        <span id="errtoDate" class="text-danger">Please select To date</span>
+                    </div>
+                    <div class="form-group col-md-12">
+                        <label>Description</label>
+                        <textarea id="descriptions" style=" height: 200px;" class="form-control"></textarea>
+                        <span id="errDescription" class="text-danger">Please Add Description</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btnadd">Save</button>
+                <button type="button" class="btn btn-primary" id="btnupdate">Update</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" id="btnholidaypopupclose">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addmanualTime" tabindex="-1" role="dialog" aria-labelledby="addmanualTimeLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="addmanualTimetLabel">Add Manual Time</h3>
+                <h3 class="modal-title" id="updatemanualTimeLabel">Update Manual Time</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="btnholidaypopupclose">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="box-body">
+                    <div class="form-group col-md-12">
+                        <label>Name</label>
+                        @*<input type="text" id="txtname" class="form-control" />
+                        <span id="errName" class="text-danger">Please enter name</span>*@
+                        <input type="hidden" asp-for="Id" id="txtId" />
+                        @if (roles.Contains("SuperAdmin") || roles.Contains("HR"))
+                        {
+                            <div class="form-group">
+                                <select name="Userid" id="txtname2" class="form-control" asp-items="@ViewBag.AllUserList"></select>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="form-group">
+                                <input id="txtname2" value="@ViewBag.EmployeeId" type="hidden" />
+                                <input id="txtEmployee2" value="@ViewBag.EmployeeName" class="form-control" readonly />
+                                <input type="hidden" asp-for="Id" value="@user.Id" />
+                            </div>
+                        }
+                    </div>
+                    <div class="form-group col-md-12">
+                        <label>Date</label>
+                        <input type="date" id="date" class="form-control" />
+                        <span id="errfromDate" class="text-danger">Please Date</span>
+                    </div>
+                    <div class="form-group col-md-12">
+                        <label>From Time</label>
+                        <input type="time" id="frmtime" class="form-control" />
+                        <span id="errfrmTime" class="text-danger">Please select From Time</span>
+                    </div>
+                    <div class="form-group col-md-12">
+                        <label>To Time</label>
+                        <input type="time" id="totime" class="form-control" />
+                        <span id="errtoTime" class="text-danger">Please select From Time</span>
+                    </div>
+                    <div class="form-group col-md-12">
+                        <label>Description</label>
+                        <textarea id="descriptions2" style=" height: 200px;" class="form-control"></textarea>
+                        <span id="errDescription" class="text-danger">Please Add Description</span>
+                    </div>
+                    @*<div class="form-group col-md-12">
+                    <label>Is Approved</label>
+                    <input type="checkbox" id="chkapprov">
+                    </div>*@
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btnadd2">Save</button>
+                <button type="button" class="btn btn-primary" id="btnupdate2">Update</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" id="btnholidaypopupclose">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- /.content-wrapper -->
+@section Styles{
+    <!-- DataTables -->
+    <link rel="stylesheet" href="~/adminlte/components/datatables.net-bs/css/dataTables.bootstrap.min.css">
+}
+
+
+    @section Scripts{
+    <!-- DataTables -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    @*<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>*@
+    <script src="~/adminlte/components/datatables.net/js/jquery.dataTables.min.js"></script>
+    <script src="~/adminlte/components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+
+    @*<script src="jquery-3.5.1.min.js"></script>*@
+    <!-- page script -->
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            $("#btnChangeStatus").attr("disabled", "disabled");
+            $("#errSelectStatus").attr("style", "display:none");
+            Bindtablegrid();
+
+            var checkedValues = [];
+
+            function Bindtablegrid(id) {
+
+                if (id == null || id == '' || id == undefined) {
+                    id = $("#txtname").val();
+                }
+
+                $.ajax({
+                    url: "/TimeSheet/BindGridData",
+                    method: 'Post',
+                    data: { id: id },
+                    success: function (data) {
+                        console.log(data);
+                        $("#levtblbdy").empty();
+
+                        if (data.timeSheets != null && data.timeSheets.length > 0) {
+                            var innerHtml = '';
+                            //var arrya = new Array();
+                            $.each(data.timeSheets, function (i, v) {
+                                var rowdata = data.timeSheets[i];
+                                innerHtml += "<tr>";
+                                innerHtml += "<td scope='col' id='User ID'>" + rowdata.employeeId + "</td>";
+                                innerHtml += "<td scope='col' id='From Date'>" + moment(rowdata.fromDate).format('LL') + "</td>";
+                                innerHtml += "<td scope='col' id='To Date'>" + moment(rowdata.toDate).format('LL') + "</td>";
+                                innerHtml += "<td scope='col' id='Description'>" + rowdata.description + "</td>";
+                                innerHtml += "<td><a class='fa' onclick='gettimesheet(" + rowdata.id + ")'><i class='fa fa-edit'></i></a></td>";
+                                //innerHtml += "<td><a class='fa' onclick='gettimesheet(" + rowdata.id + ")'><i class='fa fa-edit'></i></a>&nbsp;&nbsp;<a href='#' class='fa' onclick='deleteholiday("+rowdata.id+")'><i style='color:red' class='fa fa-trash'></i></a></td>";
+                                innerHtml += "</tr>";
+                            });
+
+                            $("#levtblbdy").html(innerHtml);
+                        }
+                        else {
+                            var innerhtml = '<tr><td colspan="9" class="text-center">No record found.</td></tr>';
+                            $("#levtblbdy").html(innerhtml);
+                        }
+                        $("#mantblbdy").empty();
+                        if (data.manualTimeSheets != null && data.manualTimeSheets.length > 0) {
+                            var innerHtml = '';
+                            //var arrya = new Array();
+                            var isAppr = "Pending Request";
+                            var frmManualTime = "";
+                            var toManualTime = "";
+                            var isAdmin = $("#IsAdmin").val();
+
+                            $.each(data.manualTimeSheets, function (i, v) {
+                                var rowdata = data.manualTimeSheets[i];
+                                isAppr = "Pending Request";
+                                if (rowdata.isApprove == true) { isAppr = "Approved"; }
+                                if (rowdata.isApprove == false) { isAppr = "Rejected"; }
+                                frmManualTime = convertToTime(rowdata.fromTime);
+                                toManualTime = convertToTime(rowdata.toTime);
+
+                                if (isAdmin == "true") {
+                                    if (isAppr == "Approved") {
+                                        innerHtml += "<tr class='bg-success'>";
+                                        innerHtml += "<td><input type='checkbox' checked='checked' disabled='disabled' /></td>";
+                                    }
+                                    else if (isAppr == "Rejected") {
+                                        innerHtml += "<tr class='bg-danger'>";
+                                        innerHtml += "<td><input type='checkbox' checked='checked' disabled='disabled' /></td>";
+                                    }
+                                    else {
+                                        innerHtml += "<tr>";
+                                        innerHtml += "<td><input type='checkbox' class='checkBox' value=" + rowdata.id + " /></td>";
+                                    }
+                                }
+                                else {
+                                    innerHtml += "<tr>";
+                                }
+                                innerHtml += "<td scope='col' id='User ID'>" + rowdata.employeeId + "</td>";
+                                innerHtml += "<td scope='col' id='Date'>" + moment(rowdata.manualDate).format('LL') + "</td>";
+                                innerHtml += "<td scope='col' id='From Time'>" + frmManualTime + "</td>";
+                                innerHtml += "<td scope='col' id='To Time'>" + toManualTime + "</td>";
+                                innerHtml += "<td scope='col' id='Description'>" + rowdata.description + "</td>";
+                                //innerHtml += "<td><a class='fa' onclick='gettimesheet(" + rowdata.id + ")'><i class='fa fa-edit'></i></a></td>";
+                                innerHtml += "<td><a>" + isAppr + "</a></td>";
+                                innerHtml += "</tr>";
+                            });
+
+                            $("#mantblbdy").html(innerHtml);
+                        }
+                        else {
+                            var innerhtml = '<tr><td colspan="10" class="text-center">No record found.</td></tr>';
+                            $("#mantblbdy").html(innerhtml);
+                        }
+                    }
+                });
+            };
+
+            $('#todate').on('change', function () {
+                var fdt = $('#fromdate').val();
+                var tdt = $('#todate').val();
+                if (tdt < fdt) {
+                    toastr.warning('To date should be greater than From date.');
+                    $('#todate').val('');
+                }
+            });
+
+            $("#btnadd").click(function () {
+                var isvalid = true;
+                var IsSUperAdmin = '@ViewBag.IsSUperAdmin'
+                if (IsSUperAdmin == 'True') {
+                    var name = $("#txtname").val();
+                }
+                else {
+                    var name = '@ViewBag.EmployeeId.ToString()';
+                }
+                var fromdate = $("#fromdate").val();
+                var todate = $("#todate").val();
+                var description = $("#descriptions").val();
+
+                if (name == null || name == "" || name == undefined) {
+                    $("#errName").show();
+                    isvalid = false;
+                }
+                else {
+                    $("#errName").hide();
+                }
+
+                if (fromdate == null || fromdate == "" || fromdate == undefined) {
+                    $("#errfromDate").show();
+                    isvalid = false;
+                }
+                else {
+                    $("#errfromDate").hide();
+                }
+
+                if (todate == null || todate == "" || todate == undefined) {
+                    $("#errtoDate").show();
+                    isvalid = false;
+                }
+                else {
+                    $("#errtoDate").hide();
+                }
+
+                if (description == null || description == "" || description == undefined) {
+                    $("#errDescription").show();
+                    isvalid = false;
+                }
+                else {
+                    $("#errDescription").hide();
+                }
+
+                if (!isvalid) {
+                    return;
+                }
+                if (isvalid) {
+                    var objtimesheet = {
+                        EmployeeId: name,
+                        FromDate: fromdate,
+                        ToDate: todate,
+                        Description: description
+                    };
+
+                    $.ajax({
+                        type: "POST",
+                        url: "/TimeSheet/AddTimeSheet",
+                        dataType: "json",
+                        data: { timesheet: objtimesheet },
+                        //contentType: false,
+                        success: function (data) {
+                            if (data.issuccess) {
+                                toastr.success(data.message);
+                                setTimeout(function () {
+                                    window.location.reload();
+                                }, 600);
+                            }
+                            else {
+                                toastr.error(data.message);
+                                setTimeout(function () {
+                                    window.location.reload();
+                                }, 600);
+                            }
+                        },
+                        complete: function () {
+
+                        },
+                        error: function (xhr, textStatus, errorThrown) {
+
+                        }
+                    });
+                }
+            });
+
+            $("#btnadd2").click(function () {
+                debugger;
+                var name = "";
+                var IsSUperAdmin = '@ViewBag.IsSUperAdmin';
+                if (IsSUperAdmin == 'True') {
+                    name = $("#txtname2").val();
+                }
+                else {
+                    name = '@ViewBag.EmployeeId.ToString()';
+                }
+                var txtId = $("#txtId").val();
+                if (txtId == "" || txtId == undefined || txtId == null) txtId = "0";
+
+                var ManualDate = $("#date").val();
+                var fromTime = $("#frmtime").val();
+                var toTime = $("#totime").val();
+                var description = $("#descriptions2").val();
+
+                var isvalid = true;
+
+                if (name == null || name == "" || name == undefined) {
+                    $("#errName").show();
+                    isvalid = false;
+                }
+                else {
+                    $("#errName").hide();
+                }
+
+                if (ManualDate == null || ManualDate == "" || ManualDate == undefined) {
+                    $("#errfromDate").show();
+                    isvalid = false;
+                }
+                else {
+                    $("#errfromDate").hide();
+                }
+
+                if (fromTime == null || fromTime == "" || fromTime == undefined) {
+                    $("#errfrmTime").show();
+                    isvalid = false;
+                }
+                else {
+                    $("#errfrmTime").hide();
+                }
+
+                if (toTime == null || toTime == "" || toTime == undefined) {
+                    $("#errtoTime").show();
+                    isvalid = false;
+                }
+                else {
+                    $("#errtoTime").hide();
+                }
+
+                if (description == null || description == "" || description == undefined) {
+                    $("#errDescription").show();
+                    isvalid = false;
+                }
+                else {
+                    $("#errDescription").hide();
+                }
+
+                if (!isvalid) {
+                    return;
+                }
+                if (isvalid) {
+                    var objtimesheet = {
+                        Id: parseInt.toString(txtId),
+                        EmployeeId: name,
+                        ManualDate: ManualDate,
+                        FromTime: fromTime,
+                        ToTime: toTime,
+                        Description: description
+                    };
+
+                    $.ajax({
+                        type: "POST",
+                        url: "/TimeSheet/AddManualTimeSheet",
+                        dataType: "json",
+                        data: { timesheet: objtimesheet },
+                        //contentType: false,
+                        success: function (data) {
+                            if (data.issuccess) {
+                                toastr.success(data.message);
+                                setTimeout(function () {
+                                    window.location.reload();
+                                }, 600);
+                            }
+                            else {
+                                toastr.error(data.message);
+                                setTimeout(function () {
+                                    window.location.reload();
+                                }, 600);
+                            }
+                        },
+                        complete: function () {
+
+                        },
+                        error: function (xhr, textStatus, errorThrown) {
+
+                        }
+                    });
+                }
+
+            });
+
+            $("#grid2").on("change", ".checkAll", function () {
+                var checkValue = $(this).prop("checked");
+                if (checkValue == true) {
+                    $(".checkBox").prop("checked", "checked");
+                    $("#btnChangeStatus").removeAttr("disabled", "disabled");
+
+                    $('.checkBox').each(function () {
+                        checkedValues.push($(this).val());
+                    });
+                }
+
+                if (checkValue == false) {
+                    $(".checkBox").prop("checked", false);
+                    $("#btnChangeStatus").attr("disabled", "disabled");
+
+                    $('.checkBox').each(function () {
+                        var valueToRemove = $(this).val();
+                        checkedValues = checkedValues.filter(function (value) {
+                            return value !== valueToRemove;
+                        });
+                    });
+                }
+
+            });
+
+            $("#grid2").on("change", ".checkBox", function () {
+                var checkValue = $(this).prop("checked");
+                if (checkValue == true) {
+                    $(this).prop("checked", "checked");
+                    checkedValues.push($(this).val());
+                    $("#btnChangeStatus").removeAttr("disabled", "disabled");
+                }
+                if (checkValue == false) {
+                    $(this).prop("checked", false);
+                    var valueToRemove = $(this).val();
+                    $('.checkBox').each(function () {
+                        checkedValues = checkedValues.filter(function (value) {
+                            return value !== valueToRemove;
+                        });
+                    });
+                }
+
+                if (checkedValues.length == 0) {
+                    $("#btnChangeStatus").attr("disabled", "disabled");
+                }
+            });
+
+            $("#btnChangeStatus").click(function () {
+                var getVal = $("#selectStatus").val();
+
+                if (getVal == "Select") {
+                    $("#errSelectStatus").removeAttr("style");
+                } else {
+                    $("#errSelectStatus").attr("style", "display:none");
+
+                    var isStatus = false;
+
+                    if (getVal == "1") {
+                        isStatus = true;
+                    }
+
+                    $.ajax({
+                        type: "POST",
+                        url: "/TimeSheet/AcceptOrRejectManualTime",
+                        dataType: "json",
+                        data: { status: isStatus, ids: checkedValues },
+                        success: function (response) {
+                            if (response) {
+                                toastr.success(response);
+                                setTimeout(function () {
+                                    window.location.reload();
+                                }, 600);
+                            }
+                            else {
+                                toastr.error(response);
+                                setTimeout(function () {
+                                    window.location.reload();
+                                }, 600);
+                            }
+                        },
+                        complete: function () {
+
+                        },
+                        error: function (xhr, textStatus, errorThrown) {
+
+                        }
+                    });
+
+
+                }
+            });
+
+            $("#addTimeSheet").on("click","#btnupdate", function () {
+                var isvalid = true;
+                var id = $("#Id").val();
+                var name = $("#txtname").val();
+                var fromdate = $("#fromdate").val();
+                var todate = $("#todate").val();
+                var description = $("#descriptions").val();
+
+                if (name == null || name == "" || name == undefined) {
+                    $("#errName").show();
+                    isvalid = false;
+                }
+                else {
+                    $("#errName").hide();
+                }
+
+                if (fromdate == null || fromdate == "" || fromdate == undefined) {
+                    $("#errfromDate").show();
+                    isvalid = false;
+                }
+                else {
+                    $("#errfromDate").hide();
+                }
+
+                if (todate == null || todate == "" || todate == undefined) {
+                    $("#errtoDate").show();
+                    isvalid = false;
+                }
+                else {
+                    $("#errtoDate").hide();
+                }
+
+                if (description == null || description == "" || description == undefined) {
+                    $("#errDescription").show();
+                    isvalid = false;
+                }
+                else {
+                    $("#errDescription").hide();
+                }
+
+                if (!isvalid) {
+                    return;
+                }
+                if (isvalid) {
+                    var objtimesheet = {
+                        Id: id,
+                        EmployeeId: name,
+                        FromDate: fromdate,
+                        ToDate: todate,
+                        Description: description
+                    };
+
+                    $.ajax({
+                        type: "POST",
+                        url: "/TimeSheet/UpdateTimeSheet",
+                        dataType: "json",
+                        data: { timesheet: objtimesheet },
+                        success: function (data) {
+                            if (data.issuccess) {
+                                toastr.success(data.message);
+                                setTimeout(function () {
+                                    window.location.reload();
+                                }, 600);
+                            }
+                            else {
+                                toastr.error(data.message);
+                                setTimeout(function () {
+                                    window.location.reload();
+                                }, 600);
+                            }
+                        },
+                        complete: function () {
+
+                        },
+                        error: function (xhr, textStatus, errorThrown) {
+
+                        }
+                    });
+                }
+            });
+
+        });
+
+
+        function openpopup() {
+            cleardata();
+            $("#addTimeSheet").modal("show");
+            $("#btnadd").show();
+            $("#btnupdate").hide();
+            $("#addTimeSheetLabel").show();
+            $("#updateTimeSheetLabel").hide();
+        }
+
+        function openpopup2() {
+            cleardata2();
+            $("#addmanualTime").modal("show");
+            $("#btnadd2").show();
+            $("#btnupdate2").hide();
+            $("#addmanualTimetLabel").show();
+            $("#updatemanualTimeLabel").hide();
+        }
+
+        function cleardata() {
+            $('.text-danger').hide();
+            $("#txtname").val('');
+            $("#fromdate").val('');
+            $("#descriptions").val('');
+            $("#todate").val('');
+        }
+
+        function cleardata2() {
+            $('.text-danger').hide();
+            $("#txtname2").val('');
+            $("#date").val('');
+            $("#frmtime").val('');
+            $("#totime").val('');
+            $("#descriptions2").val('');
+            $("#chkapprov").val('');
+        }
+
+        function gettimesheet(id) {
+            $.ajax({
+                type: "GET",
+                url: "/TimeSheet/GetTimeSheet",
+                dataType: "json",
+                data: { id: id },
+                success: function (response) {
+                    if (response.issuccess) {
+                        var data = response.data;
+                        openpopup();
+                        $("#btnupdate").show();
+                        $("#btnadd").hide();
+                        $("#updateTimeSheetLabel").show();
+                        $("#addTimeSheetLabel").hide();
+                        $("#Id").val(data.id);
+                        $("#txtname").val(data.employeeId);
+                        $("#txtEmployee").val(data.firstName + ' ' + data.lastName);
+                        data.fromDate = data.fromDate.substr(0, 10);
+                        $("#fromdate").val(data.fromDate);
+                        data.toDate = data.toDate.substr(0, 10);
+                        $("#todate").val(data.toDate);
+                        $("#descriptions").val(data.description);
+                    }
+                    else {
+                        toastr.error(data.message);
+                    }
+                },
+                complete: function () {
+
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                }
+            });
+        }
+
+        function gettmantime(id) {
+            $.ajax({
+                type: "GET",
+                url: "/TimeSheet/GetTimeSheet",
+                dataType: "json",
+                data: { id: id },
+                success: function (response) {
+                    if (response.issuccess) {
+                        var data = response.data;
+                        openpopup();
+                        $("#btnupdate2").show();
+                        $("#btnadd2").hide();
+                        $("#updatemanualTimeLabel").show();
+                        $("#addTimeSheetLabel").hide();
+                        $("#txtname2").val(data.employeeId);
+                        $("#txtEmployee2").val(data.firstName + ' ' + data.lastName);
+                        data.fromDate = data.fromDate.substr(0, 10);
+                        $("#fromdate").val(data.fromDate);
+                        data.toDate = data.toDate.substr(0, 10);
+                        $("#todate").val(data.toDate);
+                        $("#descriptions").val(data.description);
+                    }
+                    else {
+                        toastr.error(data.message);
+                    }
+                },
+                complete: function () {
+
+                },
+                error: function (xhr, textStatus, errorThrown) {
+
+                }
+            });
+        }
+
+        function convertToTime(time) {
+            const dateObject = new Date(time);
+            const hours = dateObject.getHours();
+            const minutes = dateObject.getMinutes();
+            return hours + "." + minutes;
+        }
+
+    </script>
+
+
+}

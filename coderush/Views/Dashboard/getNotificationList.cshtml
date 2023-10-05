@@ -1,0 +1,135 @@
+﻿@model IEnumerable<CodesDotHRMS.Models.ViewModels.NotificationViewModel>
+
+@{
+    ViewData["Title"] = "getNotificationList";
+    Layout = "~/Views/Shared/_Adminlte.cshtml";
+}
+
+<h2>getNotificationList</h2>
+
+
+
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <!-- Main content -->
+    <section class="content">
+        <!-- Default box -->
+        <div class="box">
+            <div class="box-header with-border">
+                <h3 class="box-title">Notification List</h3>
+            </div>
+            <div class="box-body">
+                <div class="table-responsive">
+
+                    <table id="grid" class="table table-striped" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.Id)
+                                </th>
+                                <th>
+                                    User Name
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.Title)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.CreatedDate)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.NotifyAction)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.NotifyController)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.IsRead)
+                                </th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Id)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.FullName)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Title)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.CreatedDate)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.NotifyAction)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.NotifyController)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.IsRead)
+                                    </td>
+                                    <td>
+                                        <a href=@Url.Action("ReadNotification", "Dashboard", new { Id = @item.Id }) data-toggle="tooltip" title="Goto Page"> <i class="fa fa-external-link" aria-hidden="true"></i> </a>
+                                        |
+                                        <a href="#" onclick="deletenotification(@item.Id)" data-toggle="tooltip" title="Delete"><i style="color:red" class="fa fa-trash"></i></a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+            <!-- /.box-body -->
+        </div>
+
+        <!-- /.box -->
+    </section>
+    <!-- /.content -->
+</div>
+
+<!-- page script -->
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $('#grid').DataTable({
+            pageLength: 10,
+            filter: true,
+            deferRender: true
+        });
+    });
+
+    function deletenotification(id) {
+        if (confirm("Are you sure you want to delete this notification?")) {
+            $.ajax({
+                type: "GET",
+                url: "/Dashboard/DeleteNotification",
+                dataType: "json",
+                data: { id: id },
+                success: function (response) {
+                    if (response.issuccess) {
+                        toastr.success(response.message);
+                        window.location.reload();
+                    }
+                    else {
+                        toastr.error(data.message);
+                    }
+                },
+                complete: function () {
+
+                },
+                error: function (xhr, textStatus, errorThrown) {
+
+                }
+            });
+        }
+    }
+
+</script>
+
+}

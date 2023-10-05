@@ -1,0 +1,205 @@
+﻿@model coderush.Models.ViewModels.CandidateMastersViewModel
+@using System.Globalization
+@{
+    ViewData["Title"] = "Candidate Form";
+    var dteFormate = "MM-dd-yyyy";
+    var InterviewDate = Model != null && Model.InterviewDate.HasValue ? Model.InterviewDate.Value.ToString(dteFormate, CultureInfo.InvariantCulture) : string.Empty;
+}
+
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h1>
+            @ViewData["Title"]
+        </h1>
+        <p>
+            @await Html.PartialAsync(PartialView.StatusMessage, TempData[StaticString.StatusMessage])
+        </p>
+
+    </section>
+    <!-- Main content -->
+    <section class="content">
+        <!-- Default box -->
+        <form asp-controller="CandidateMaster" enctype="multipart/form-data" asp-action="SubmitForm" method="post">
+            <div class="box">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Create or edit existing Candidate item</h3>
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse" data-toggle="tooltip"
+                                title="Collapse">
+                            <i class="fa fa-minus"></i>
+                        </button>
+                        <button type="button" class="btn btn-box-tool" data-widget="remove" data-toggle="tooltip" title="Remove">
+                            <i class="fa fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="box-body">
+                    <input type="hidden" asp-for="Id" />
+                    <div class=" form-group col-md-6">
+                        <label asp-for="Name"></label>
+                        <input id="candidatename" maxlength="100" asp-for="Name" class="form-control" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                        @*<span class="text-danger hidespan spantext">Please enter Text</span>*@
+
+                    </div>
+                    <div class=" form-group col-md-6">
+
+                        <label asp-for="Email"></label>
+                        <input id="candidateemail" asp-for="Email" class="form-control" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                        @*<span class="text-danger hidespan spantext">Please enter Text</span>*@
+                    </div>
+                    <div class=" form-group col-md-6">
+                        <label asp-for="PlaceOfInterview"></label>
+                        <select asp-for="PlaceOfInterview" class="form-control">
+                            <option value="0">--Select--</option>
+                            <option>AT Office</option>
+                            <option>Online</option>
+                        </select>
+                        <span asp-validation-for="PlaceOfInterview" class="text-danger"></span>
+                        @*<span class="text-danger hidespan spantext">Please enter Text</span>*@
+                    </div>
+
+                    <div class=" form-group col-md-6">
+                        <label asp-for="Technologies"></label>
+                        @*@Html.DropDownList("Selection", new SelectList(ViewBag.SelectionList, "Value", "Text"), new { @class = "form-control", @id = "ddlSelectionList" })*@
+                        <select name="technologies" class="form-control" asp-items="@ViewBag.CandidatetechnologiesList" asp-for="Technologies">
+                            <option value="">-- Select --</option>
+                        </select>
+                        <span asp-validation-for="technologies" class="text-danger"></span>
+                        @*<span class="text-danger hidespan spanSelection">Please select Type</span>*@
+                    </div>
+                    <div class="form-group ">
+                        <div class="form-group col-md-6">
+                            <label asp-for="InterviewDate"></label>
+                            <input type="date" id="interviewDate" asp-for="InterviewDate" class="form-control" />
+                            <span asp-validation-for="InterviewDate" class="text-danger"></span>
+                            @*<span class="text-danger hidespan spantext">Please enter Text</span>*@
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label asp-for="InterviewTime"></label>
+                            <input type="time" asp-for="InterviewTime" class="form-control" />
+                            <span asp-validation-for="InterviewTime" class="text-danger"></span>
+                            @*<span class="text-danger hidespan spantext">Please enter Text</span>*@
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-group col-md-6">
+                            <label asp-for="Phone"></label>
+                            <input id="candidatephone" asp-for="Phone" class="form-control" />
+                            <span asp-validation-for="Phone" class="text-danger"></span>
+                            @*<span class="text-danger hidespan spantext">Please enter Text</span>*@
+                        </div>
+
+                        @if (Model.Id != 0)
+                        {
+                            <div class="form-group col-md-6">
+                                <label asp-for="FileUpload"></label>
+                                <img src="~/document/Candidate/@Model.filename" width="100" height="100" />
+                                <input type="file" asp-for="FileUpload" id="FileUpload" class="form-control" />
+                                <input type="hidden" asp-for="filename" name="filename" value="@Model.filename" id="filename">
+                                <span asp-validation-for="FileUpload" class="text-danger"></span>
+                                @*<span id="file_error"></span>*@
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="form-group col-md-6">
+                                <label asp-for="FileUpload"></label>
+                                <input type="file" asp-for="FileUpload" id="FileUpload" class="form-control" />
+                                <input type="hidden" asp-for="filename" name="filename" value="@Model.filename" id="filename">
+                                <span asp-validation-for="FileUpload" class="text-danger"></span>
+                                @*<span id="file_error"></span>*@
+                            </div>
+                        }
+                    </div>
+
+                    <div class="form-group col-md-3">
+                        <label asp-for="Status"></label>
+                        <select id="dropdown" asp-for="Status" class="form-control">
+                            <option value="0"> --Select--</option>
+                            <option value="1"> Interview Schedule</option>
+                            <option value="2"> Tecnical Round</option>
+                            <option value="3"> Practical</option>
+                            <option value="4"> Final Round</option>
+                            <option value="5"> Hold</option>
+                            <option value="6"> Offer Sent</option>
+                            <option value="7"> Rejected Offer</option>
+                            <option value="8"> Hired</option>
+                        </select>
+                    </div>
+                    @*<div class="form-group col-md-3">
+                    <label>Status:</label>
+                    <input type="checkbox" id="status" asp-for="Status" class=""/>
+
+                    </div>*@
+                    <div class="form-group col-md-12">
+                        <div class="form-group">
+                            <label asp-for="InterviewDescription"></label>
+                            <textarea asp-for="InterviewDescription" TextMode="MultiLine" rows="4" cols="50" type="text" value="" class="form-control"></textarea>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- /.box-body -->
+                <div class="box-footer">
+                    <a href="/CandidateMaster/CandidateIndex" class="btn btn-default">Back</a>
+                    <button type="submit" class="btn btn-primary" id="btnsave">Save</button>
+                </div>
+                <!-- /.box-footer-->
+            </div>
+        </form>
+
+        <!-- /.box -->
+    </section>
+    <!-- /.content -->
+</div>
+<!-- /.content-wrapper -->
+@section Styles{
+    <!-- DataTables -->
+    <link rel="stylesheet" href="~/adminlte/components/datatables.net-bs/css/dataTables.bootstrap.min.css">
+
+}
+
+
+@section Scripts{
+
+    <partial name="_ValidationScriptsPartial" />
+    @*<script src="~/js/Candidate.js"></script>*@
+
+    <script type="text/javascript">
+        $(function () {
+            $("#checkple input[type=checkbox]").click(function () {
+                if ($(this).is(":checked")) {
+                    $("#checkple input[type=checkbox]").removeAttr("checked");
+                    $(this).attr("checked", "checked");
+                }
+            });
+            $(".check").each(function () {
+
+                if (element.checked == true) {
+
+                    toastr.success('checked');
+
+                }
+
+            });
+            $("#FileUpload").on('change', function () {
+                var filePath = $(this).val(); // Get the file path
+                $('#FileName').val(filePath); // Display the file path in the text input
+            });
+
+        });
+    </script>
+
+
+
+    <script>
+        $('input[type="checkbox"]').click(function () {
+            $(".check_class").attr("checked", false);
+            $(this).attr("checked", true);
+        });
+    </script>
+}
